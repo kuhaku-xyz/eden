@@ -15,7 +15,7 @@ interface UsersPanelProps {
 }
 
 export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanelProps) {
-  const { selectedServerId, account } = useChatApp();
+  const { selectedServer, account } = useChatApp();
 
   const server = db.room();
   const { user: myPresence, peers, publishPresence } = db.rooms.usePresence(server);
@@ -31,13 +31,17 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
   }, [account]);
 
   useEffect(() => {
-    console.log('selectedServerId', selectedServerId);
-  }, [selectedServerId]);
+    console.log('selectedServer', selectedServer);
+  }, [selectedServer]);
 
+  /// deduplicate users
   const users = [
-    myPresence && { ...myPresence, isSelf: true },
-    ...Object.values(peers || {}).map((peer) => ({ ...peer, isSelf: false })),
-  ].filter(Boolean);
+    ...new Set(
+      [
+        ...Object.values(peers || {}),
+      ].filter(Boolean)
+    ),
+  ];
 
   return (
     <div
@@ -63,7 +67,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
       </button>
       {!isUsersCollapsed && (
         <>
-          <h2 className="text-lg font-semibold p-4 py-2 border-b truncate">
+          <h2 className="text-lg font-semibold h-14 px-4 py-2 items-center flex border-b truncate">
             Users
           </h2>
           <ScrollArea className="flex-grow">

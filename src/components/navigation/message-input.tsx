@@ -9,15 +9,15 @@ import { useChatApp } from "@/components/chat-app-context";
 import { id } from "@instantdb/react";
 
 export function MessageInput() {
-  const { selectedChannelId, account } = useChatApp();
+  const { selectedChannel, account } = useChatApp();
   const [messageInput, setMessageInput] = useState("");
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || !selectedChannelId || !account) return;
+    if (!messageInput.trim() || !selectedChannel || !account) return;
     await db.transact(
       db.tx.messages[id()].update({
-        channelId: selectedChannelId,
+        channelId: selectedChannel.id,
         text: messageInput.trim(),
         sender: account.username?.localName || account.address,
         senderId: account.address,
@@ -31,9 +31,9 @@ export function MessageInput() {
     <form onSubmit={handleSendMessage} className="flex w-full gap-2 items-center">
       <Input
         type="text"
-        placeholder={selectedChannelId ? "Type your message..." : "Select a channel to chat"}
+        placeholder={selectedChannel ? "Type your message..." : "Select a channel to chat"}
         className="flex-1"
-        disabled={!selectedChannelId}
+        disabled={!selectedChannel}
         autoComplete="off"
         value={messageInput}
         onChange={(e) => setMessageInput(e.target.value)}
@@ -45,7 +45,7 @@ export function MessageInput() {
       />
       <Button
         type="submit"
-        disabled={!selectedChannelId || !messageInput.trim()}
+        disabled={!selectedChannel || !messageInput.trim()}
         title="Send Message"
       >
         <Send className="h-4 w-4" />

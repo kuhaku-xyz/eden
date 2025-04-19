@@ -1,26 +1,27 @@
 import React, { createContext, useContext, useState } from "react";
 import type { Account } from "@lens-protocol/client";
+import { Channel, Server } from "@/lib/db/instant";
 
 interface ChatAppContextValue {
   account: Account | null;
-  selectedServerId: string | null;
-  setSelectedServerId: (id: string | null) => void;
-  selectedChannelId: string | null;
-  setSelectedChannelId: (id: string | null) => void;
+  selectedServer: Server | null;
+  setSelectedServer: (server: Server | null) => void;
+  selectedChannel: Channel | null;
+  setSelectedChannel: (channel: Channel | null) => void;
 }
 
 const ChatAppContext = createContext<ChatAppContextValue | undefined>(undefined);
 
 export function ChatAppProvider({ account, children }: { account: Account | null; children: React.ReactNode }) {
-  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
-  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+  const [selectedServer, setSelectedServer] = useState<Server | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 
   const value: ChatAppContextValue = {
     account,
-    selectedServerId,
-    setSelectedServerId,
-    selectedChannelId,
-    setSelectedChannelId,
+    selectedServer,
+    setSelectedServer,
+    selectedChannel,
+    setSelectedChannel,
   };
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;

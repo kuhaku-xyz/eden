@@ -14,13 +14,13 @@ interface MessagesAreaProps {
 export function MessagesArea({
   messagesEndRef,
 }: MessagesAreaProps) {
-  const { selectedChannelId, account } = useChatApp();
+  const { selectedChannel, account } = useChatApp();
   const { isLoading, error, data } = db.useQuery(
-    selectedChannelId
-      ? { messages: { $: { where: { channelId: selectedChannelId } } } }
+    selectedChannel
+      ? { messages: { $: { where: { channelId: selectedChannel.id } } } }
       : { messages: {} }
   );
-  const messages: Message[] = selectedChannelId
+  const messages: Message[] = selectedChannel
     ? (data?.messages ?? []).sort((a, b) => a.createdAt - b.createdAt)
     : [];
 

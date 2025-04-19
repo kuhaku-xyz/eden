@@ -20,27 +20,27 @@ export function ServerPanel({
   isCollapsed: boolean;
 }) {
   const {
-    selectedServerId,
-    setSelectedServerId,
-    selectedChannelId,
-    setSelectedChannelId,
+    selectedServer,
+    setSelectedServer,
+    selectedChannel,
+    setSelectedChannel,
   } = useChatApp();
 
   // Fetch channels only when a server is selected
   const { isLoading, error, data } = db.useQuery(
-    selectedServerId ? { channels: { $: { where: { serverId: selectedServerId } } } } : { channels: {} }
+    selectedServer ? { channels: { $: { where: { serverId: selectedServer.id } } } } : { channels: {} }
   );
-  const channels: Channel[] = selectedServerId ? (data?.channels ?? []) : [];
+  const channels: Channel[] = selectedServer ? (data?.channels ?? []) : [];
 
   // Channel creation handler
   const handleCreateChannel = () => {
-    if (!selectedServerId) return;
+    if (!selectedServer) return;
     const name = prompt("Enter channel name:");
     if (!name) return;
     db.transact(
       db.tx.channels[id()].update({
         name: name.trim(),
-        serverId: selectedServerId,
+        serverId: selectedServer.id,
         createdAt: Date.now(),
       })
     );
@@ -53,11 +53,11 @@ export function ServerPanel({
         {servers.map((server) => (
           <Button
             key={server.id}
-            variant={selectedServerId === server.id ? "secondary" : "ghost"}
+            variant={selectedServer?.id === server.id ? "secondary" : "ghost"}
             className="rounded-full w-12 h-12 p-0 flex items-center justify-center overflow-hidden border"
             onClick={() => {
-              setSelectedServerId(server.id);
-              setSelectedChannelId(null);
+              setSelectedServer(server);
+              setSelectedChannel(null);
             }}
             title={server.name}
           >
@@ -75,11 +75,9 @@ export function ServerPanel({
         </Button>
       </div>
 
-      {selectedServerId && (
+      {selectedServer && (
         <ChannelsPanel
           channels={channels}
-          selectedChannelId={selectedChannelId}
-          setSelectedChannelId={setSelectedChannelId}
           handleCreateChannel={handleCreateChannel}
           channelsLoading={isLoading}
           channelsError={error}

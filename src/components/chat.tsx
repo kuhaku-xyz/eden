@@ -13,7 +13,7 @@ import {
 import { id, db, Server, Channel, Message } from "@/lib/db/instant";
 import type { Account, App } from "@lens-protocol/client";
 import { ServerPanel } from "@/components/navigation/server-panel";
-import { ChatHeader } from "@/components/navigation/header";
+import { ChatHeader } from "@/components/navigation/chat-header";
 import { MessagesArea } from "@/components/navigation/message-area";
 import { MessageInput } from "@/components/navigation/message-input";
 import { UsersPanel } from "@/components/navigation/users-panel";
@@ -23,10 +23,10 @@ import { ChatAppProvider, useChatApp } from "@/components/chat-app-context";
 function ChatContent() {
   const {
     account,
-    selectedServerId,
-    setSelectedServerId,
-    selectedChannelId,
-    setSelectedChannelId,
+    selectedServer,
+    setSelectedServer,
+    selectedChannel,
+    setSelectedChannel,
   } = useChatApp();
 
   // Local state for UI
@@ -43,16 +43,20 @@ function ChatContent() {
 
   // Automatically select the first server if none is selected
   useEffect(() => {
-    if (!serversLoading && servers.length > 0 && !selectedServerId) {
-      setSelectedServerId(servers[0].id);
+    if (!serversLoading && servers.length > 0 && !selectedServer) {
+      setSelectedServer(servers[0]);
     }
-  }, [serversLoading, servers, selectedServerId, setSelectedServerId]);
+  }, [serversLoading, servers, selectedServer, setSelectedServer]);
 
   return (
     <>
       <CreateServerDialog open={createServerOpen} onOpenChange={setCreateServerOpen} />
       <ResizablePanelGroup direction="horizontal" className="min-h-screen w-full rounded-lg border">
-        <ResizablePanel defaultSize={25} collapsible minSize={15} maxSize={30} collapsedSize={4} onCollapse={() => setIsCollapsed(true)} onExpand={() => setIsCollapsed(false)} className={`transition-all duration-300 ease-in-out ${isCollapsed ? "min-w-[50px]" : "min-w-[250px]"}`}>
+        <ResizablePanel
+          defaultSize={25}
+          collapsible
+          minSize={20}
+          maxSize={50} collapsedSize={7} onCollapse={() => setIsCollapsed(true)} onExpand={() => setIsCollapsed(false)} className={`${isCollapsed ? "min-w-[50px]" : "min-w-[250px]"}`}>
           <ServerPanel
             servers={servers}
             serversLoading={serversLoading}
@@ -63,9 +67,9 @@ function ChatContent() {
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
           <div className="flex flex-col w-full h-full" style={{ marginRight: isUsersCollapsed ? 0 : 280 }}>
-            <ChatHeader selectedChannelId={selectedChannelId} channels={[]} />
+            <ChatHeader />
             <div className="flex-1 overflow-hidden p-4">
-              {selectedChannelId ? (
+              {selectedChannel ? (
                 <MessagesArea messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>} />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4 text-center">
