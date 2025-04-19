@@ -3,21 +3,30 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
+import { db } from "@/lib/db/instant";
+import { useChatApp } from "@/components/chat-app-context";
+import { id } from "@instantdb/react";
 
-interface MessageInputProps {
-  messageInput: string;
-  setMessageInput: (v: string) => void;
-  handleSendMessage: (e: React.FormEvent) => void;
-  selectedChannelId: string | null;
-}
+export function MessageInput() {
+  const { selectedChannelId, account } = useChatApp();
+  const [messageInput, setMessageInput] = useState("");
 
-export function MessageInput({
-  messageInput,
-  setMessageInput,
-  handleSendMessage,
-  selectedChannelId,
-}: MessageInputProps) {
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageInput.trim() || !selectedChannelId || !account) return;
+    await db.transact(
+      db.tx.messages[id()].update({
+        channelId: selectedChannelId,
+        text: messageInput.trim(),
+        sender: account.username?.localName || account.address,
+        senderId: account.address,
+        createdAt: Date.now(),
+      })
+    );
+    setMessageInput("");
+  };
+
   return (
     <form onSubmit={handleSendMessage} className="flex w-full gap-2 items-center">
       <Input

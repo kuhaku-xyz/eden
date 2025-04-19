@@ -15,18 +15,21 @@ import { Button } from "@/components/ui/button";
 import { fetchAdminsFor, fetchApp } from "@lens-protocol/client/actions";
 import { getLensClient } from "@/lib/lens/client";
 import { App } from "@lens-protocol/client";
+import { db } from "@/lib/db/instant";
+import { id } from "@instantdb/react";
+import { useChatApp } from "@/components/chat-app-context";
 
 interface CreateServerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (appData: any, appAddress: string) => void;
 }
 
-export function CreateServerDialog({ open, onOpenChange, onCreate }: CreateServerDialogProps) {
+export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogProps) {
   const [appAddress, setAppAddress] = useState("");
   const [appData, setAppData] = useState<App | null>(null);
   const [fetchingApp, setFetchingApp] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const { account } = useChatApp();
 
   const handleFetchApp = async () => {
     setFetchingApp(true);
@@ -48,12 +51,21 @@ export function CreateServerDialog({ open, onOpenChange, onCreate }: CreateServe
     }
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (appData) {
-      onCreate(appData, appAddress);
+      await db.transact(
+        db.tx.servers[id()].update({
+          address: appAddress,
+          name: appData.metadata?.name || appAddress,
+          icon: appData.metadata?.logo || "",
+          createdAt: Date.now(),
+          owner: appData.owner || account?.address || "",
+        })
+      );
       setAppAddress("");
       setAppData(null);
       setFetchError(null);
+      onOpenChange(false);
     }
   };
 

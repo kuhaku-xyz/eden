@@ -4,28 +4,32 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";
 import type { Message } from "@/lib/db/instant";
 import type { Account } from "@lens-protocol/client";
+import { db } from "@/lib/db/instant";
+import { useChatApp } from "@/components/chat-app-context";
 
 interface MessagesAreaProps {
-  messages: Message[];
-  messagesLoading: boolean;
-  messagesError: any;
-  account: Account | null;
   messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
 export function MessagesArea({
-  messages,
-  messagesLoading,
-  messagesError,
-  account,
   messagesEndRef,
 }: MessagesAreaProps) {
+  const { selectedChannelId, account } = useChatApp();
+  const { isLoading, error, data } = db.useQuery(
+    selectedChannelId
+      ? { messages: { $: { where: { channelId: selectedChannelId } } } }
+      : { messages: {} }
+  );
+  const messages: Message[] = selectedChannelId
+    ? (data?.messages ?? []).sort((a, b) => a.createdAt - b.createdAt)
+    : [];
+
   return (
     <ScrollArea className="h-full w-full" type="auto">
       <div className="flex flex-col gap-2 p-2">
-        {messagesLoading && <div className="text-xs text-muted-foreground">Loading messages...</div>}
-        {messagesError && <div className="text-xs text-red-500">Error loading messages</div>}
-        {messages.length === 0 && !messagesLoading && (
+        {isLoading && <div className="text-xs text-muted-foreground">Loading messages...</div>}
+        {error && <div className="text-xs text-red-500">Error loading messages</div>}
+        {messages.length === 0 && !isLoading && (
           <div className="text-xs text-muted-foreground italic">No messages yet.</div>
         )}
         {messages.map((msg) => (
