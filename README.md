@@ -1,22 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lens Chat
+
+A real-time chat application built with Next.js, Socket.IO, and Bun.
+
+## Features
+
+- Real-time messaging using WebSockets
+- Modern UI with Tailwind CSS
+- Connection status indicator
+- System notifications for user join/leave events
+- Responsive design
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or newer)
+- [Bun](https://bun.sh/) for running the server
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+bun install
+```
+
+2. Start the WebSocket server:
+
+```bash
+npm run server
+# or
+yarn server
+# or
+bun run server
+```
+
+3. In a separate terminal, start the Next.js development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
 # or
-pnpm dev
-# or
-bun dev
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the chat application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
+
+- The client (`src/app/page.tsx`) establishes a WebSocket connection to the server using Socket.IO
+- The server (`src/srv/server.ts`) runs on port 3001 and handles real-time communication
+- Messages are broadcast to all connected clients except the sender
+- The UI displays incoming and outgoing messages with different styling
+
+## Troubleshooting
+
+If you encounter connectivity issues:
+
+1. Make sure both the Next.js server and WebSocket server are running
+2. Check that ports 3000 and 3001 are not blocked by firewall or other services
+3. Verify that the WebSocket server URL in `src/app/page.tsx` matches your server configuration
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
