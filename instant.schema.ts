@@ -11,12 +11,20 @@ const schema = i.schema({
     // $users: i.entity({
     //   email: i.string().unique().indexed(),
     // }),
-    rooms: i.entity({
+    servers: i.entity({
+      address: i.string().unique().indexed(),
+      name: i.string().indexed(),
+      icon: i.string().optional(), // URL or identifier for the server icon
+      createdAt: i.number().indexed(),
+      owner: i.string().indexed(),
+    }),
+    channels: i.entity({
       name: i.string().unique().indexed(),
+      serverId: i.string().indexed(),
       createdAt: i.number().indexed(),
     }),
     messages: i.entity({
-      roomId: i.string().indexed(),
+      channelId: i.string().indexed(),
       text: i.string(),
       sender: i.string(),
       senderId: i.string().indexed(),
@@ -29,9 +37,13 @@ const schema = i.schema({
     }),
   },
   links: {
-    roomMessages: {
-      forward: { on: "messages", has: "one", label: "room" },
-      reverse: { on: "rooms", has: "many", label: "messages" },
+    serverChannels: {
+      forward: { on: "channels", has: "one", label: "server" },
+      reverse: { on: "servers", has: "many", label: "channels" },
+    },
+    channelMessages: {
+      forward: { on: "messages", has: "one", label: "channel" },
+      reverse: { on: "channels", has: "many", label: "messages" },
     },
   },
 });

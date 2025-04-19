@@ -22,6 +22,8 @@ import { useSignMessage, useWalletClient } from "wagmi";
 import { db } from "@/lib/db/instant";
 import { id } from "@instantdb/react";
 import { lookup } from "@instantdb/react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { ScrollArea } from "./ui/scroll-area";
 
 export function Login() {
   const [showAccountSelector, setShowAccountSelector] = useState(false);
@@ -81,7 +83,7 @@ export function Login() {
   };
 
   return (
-    <div className="p-2 space-y-2 mb-2 border-b">
+    <div className="p-2 space-y-2 mb-2">
       <ConnectKitButton.Custom>
         {({
           isConnected: isWalletConnected,
@@ -120,41 +122,44 @@ export function Login() {
                       ? "Authenticating..."
                       : accountsLoading
                         ? "Loading Accounts..."
-                        : "Log in with Lens"}
+                        : "Sign in with Lens"}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-[200px]">
                   <DialogHeader>
                     <DialogTitle>Select Lens Account</DialogTitle>
                   </DialogHeader>
-                  <div className="flex flex-col gap-2 py-4">
-                    {accountsLoading && <p>Loading accounts...</p>}
-                    {!accountsLoading && availableAccounts?.items.length === 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        No Lens profiles found for this wallet address (
-                        {connectKitDisplayName}). You might need to create one
-                        or ensure it's managed by this wallet.
-                      </p>
-                    )}
-                    {!accountsLoading &&
-                      availableAccounts &&
-                      availableAccounts.items.map((acc) => (
-                        <Button
-                          key={acc.account.address}
-                          variant="outline"
-                          onClick={() => handleLogin(acc.account.address)}
-                          disabled={authenticateLoading}
-                        >
-                          Log in as {acc.account.username?.localName}
-                        </Button>
-                      ))}
-                  </div>
+                  <ScrollArea className="flex flex-col gap-2 py-4 max-h-[400px] pr-4">
+                    <div className="flex flex-col gap-2">
+                      {accountsLoading && <p>Loading accounts...</p>}
+                      {!accountsLoading && availableAccounts?.items.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          No Lens profiles found for this wallet address (
+                          {connectKitDisplayName}). You might need to create one
+                          or ensure it's managed by this wallet.
+                        </p>
+                      )}
+                      {!accountsLoading &&
+                        availableAccounts &&
+                        availableAccounts.items.map((acc) => (
+                          <Button
+                            key={acc.account.address}
+                            variant="outline"
+                            onClick={() => handleLogin(acc.account.address)}
+                            disabled={authenticateLoading}
+                          >
+                            <Avatar className="w-6 h-6">
+                              <AvatarImage src={acc.account.metadata?.picture} />
+                              <AvatarFallback>
+                                {acc.account.username?.localName?.charAt(0) || acc.account.address.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            {acc.account.username?.localName}
+                          </Button>
+                        ))}
+                    </div>
+                  </ScrollArea>
                 </DialogContent>
-                {!authenticateLoading && !accountsLoading && (
-                  <p className="text-xs text-muted-foreground">
-                    Sign in with your Lens account to chat.
-                  </p>
-                )}
                 {(authenticateLoading || accountsLoading) && (
                   <p className="text-xs text-muted-foreground">
                     Checking authentication...
