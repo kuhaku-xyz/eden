@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlusCircle, Hash } from "lucide-react";
@@ -25,7 +27,7 @@ interface SidebarProps {
   channelsError: any;
 }
 
-export function Sidebar({
+export function ServerRoomsPanel({
   servers,
   selectedServerId,
   setSelectedServerId,

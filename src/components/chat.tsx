@@ -10,27 +10,13 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { id, db, Server, Channel, Message } from "@/lib/db/instant";
 import type { Account, App } from "@lens-protocol/client";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Sidebar } from "@/components/navigation/rooms-panel";
+import { ServerRoomsPanel } from "@/components/navigation/rooms-panel";
 import { ChatHeader } from "@/components/navigation/header";
 import { MessagesArea } from "@/components/navigation/message-area";
 import { MessageInput } from "@/components/navigation/message-input";
 import { UsersPanel } from "@/components/navigation/users-panel";
-import { fetchApp } from "@lens-protocol/client/actions";
-import { getLensClient } from "@/lib/lens/client";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
 import { CreateServerDialog } from "./navigation/create-server-dialog";
 
 export default function Chat({ account }: { account: Account | null }) {
@@ -41,10 +27,6 @@ export default function Chat({ account }: { account: Account | null }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isUsersCollapsed, setIsUsersCollapsed] = useState(false);
   const [createServerOpen, setCreateServerOpen] = useState(false);
-  const [appAddress, setAppAddress] = useState("");
-  const [appData, setAppData] = useState<any>(null);
-  const [fetchingApp, setFetchingApp] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // --- InstantDB Queries ---
   const { isLoading: serversLoading, error: serversError, data: serversData } = db.useQuery({ servers: {} });
@@ -84,26 +66,6 @@ export default function Chat({ account }: { account: Account | null }) {
       })
     );
     setMessageInput("");
-  };
-
-  const handleFetchApp = async () => {
-    setFetchingApp(true);
-    setFetchError(null);
-    setAppData(null);
-    try {
-      const lens = await getLensClient();
-      const app = await fetchApp(lens, { app: appAddress });
-      if (!app) {
-        setFetchError("App not found");
-        setFetchingApp(false);
-        return;
-      }
-      setAppData(app);
-    } catch (err: any) {
-      setFetchError("Failed to fetch app data");
-    } finally {
-      setFetchingApp(false);
-    }
   };
 
   const handleCreateServer = async (appData: App, appAddress: string) => {
@@ -154,7 +116,7 @@ export default function Chat({ account }: { account: Account | null }) {
           onExpand={() => setIsCollapsed(false)}
           className={`transition-all duration-300 ease-in-out ${isCollapsed ? "min-w-[50px]" : "min-w-[250px]"}`}
         >
-          <Sidebar
+          <ServerRoomsPanel
             servers={servers}
             selectedServerId={selectedServerId}
             setSelectedServerId={(id) => {
@@ -213,9 +175,10 @@ export default function Chat({ account }: { account: Account | null }) {
         </ResizablePanel>
         {/* Users Panel (static and collapsible) */}
         <UsersPanel
-          account={account}
+          serverId={selectedServerId}
           isUsersCollapsed={isUsersCollapsed}
           setIsUsersCollapsed={setIsUsersCollapsed}
+          currentUser={account ? { name: account.username?.localName || account.address, address: account.address } : null}
         />
       </ResizablePanelGroup>
     </>

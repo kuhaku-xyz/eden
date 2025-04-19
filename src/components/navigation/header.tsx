@@ -1,3 +1,4 @@
+"use client";
 import { MessageSquare } from "lucide-react";
 import type { Channel } from "@/lib/db/instant";
 import React from "react";

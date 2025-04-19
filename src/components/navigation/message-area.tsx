@@ -1,3 +1,5 @@
+"use client";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";
 import type { Message } from "@/lib/db/instant";
