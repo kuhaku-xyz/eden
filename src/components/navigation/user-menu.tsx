@@ -15,8 +15,8 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { useAccountsAvailable, useLogin, useLogout } from "@lens-protocol/react";
 import { useWalletClient } from "wagmi";
 import { useRouter } from "next/navigation";
-import { getPublicClient } from "@/lib/lens/client";
 import type { Account } from "@lens-protocol/client";
+import { ThemeToggle } from "../theme-toggle";
 
 interface UserMenuProps {
   account: Account | null;
@@ -63,20 +63,21 @@ export function UserMenu({ account }: UserMenuProps) {
   };
 
   return (
-    <>
+    <div className="flex items-center gap-2 px-2 py-2 h-14 w-full items-center justify-between border-b">
+      <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="py-1.5 px-1 h-12 w-full flex items-center gap-2 border-b rounded-none justify-start">
-            <Avatar className="w-6 h-6">
+          <Button variant="ghost" className="flex items-center gap-2 px-1 hover:bg-transparent dark:hover:bg-transparent hover:text-foreground justify-end">
+            <span className="truncate">{account?.username?.localName || account?.address}</span>
+            <Avatar className="w-8 h-8">
               <AvatarImage src={account?.metadata?.picture} />
               <AvatarFallback>
                 {account?.username?.localName?.charAt(0) || account?.address.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <span className="truncate">{account?.username?.localName || account?.address}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" className="w-64">
+        <DropdownMenuContent align="end" className="w-64">
           <Dialog open={switchDialogOpen} onOpenChange={setSwitchDialogOpen}>
             <DialogTrigger asChild>
               <DropdownMenuItem onSelect={e => e.preventDefault()}>
@@ -115,6 +116,6 @@ export function UserMenu({ account }: UserMenuProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </>
+    </div>
   );
 } 

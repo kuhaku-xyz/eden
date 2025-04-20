@@ -8,6 +8,7 @@ import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { env } from "process";
 import { JSX } from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
+import { ThemeProvider } from "next-themes";
 
 const wagmiConfig = createConfig(
   getDefaultConfig({
@@ -19,7 +20,7 @@ const wagmiConfig = createConfig(
     },
     appName: "Eden",
     appDescription: "Simply chat.",
-    appUrl: "https://pingpad.io",
+    appUrl: "https://eden.kuhaku.xyz",
     appIcon: "https://pingpad.io/logo.png",
   }),
 );
@@ -29,12 +30,14 @@ export const Providers = ({ children }: { children: JSX.Element }) => {
   const publicClient = getPublicClient();
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <ConnectKitProvider>
-          <LensProvider client={publicClient}>{children}</LensProvider>
-        </ConnectKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <ConnectKitProvider>
+            <LensProvider client={publicClient}>{children}</LensProvider>
+          </ConnectKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 };

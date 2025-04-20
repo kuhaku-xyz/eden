@@ -13,7 +13,7 @@ export function ChatHeader() {
         <span className="flex items-center gap-2 text-lg font-semibold">
           <MessageSquare className="h-5 w-5" />
           <span className="hidden sm:inline truncate">
-            {selectedChannel ? `#${selectedChannel.name}` : "Select a channel"}
+            {selectedChannel ? `${selectedChannel.name}` : "Select a channel"}
           </span>
         </span>
       </div>

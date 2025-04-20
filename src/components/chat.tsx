@@ -29,19 +29,15 @@ function ChatContent() {
     setSelectedChannel,
   } = useChatApp();
 
-  // Local state for UI
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isUsersCollapsed, setIsUsersCollapsed] = useState(false);
   const [createServerOpen, setCreateServerOpen] = useState(false);
 
-  // Data fetching for servers only
   const { isLoading: serversLoading, error: serversError, data: serversData } = db.useQuery({ servers: {} });
   const servers: Server[] = serversData?.servers ?? [];
 
-  // Message scroll
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Automatically select the first server if none is selected
   useEffect(() => {
     if (!serversLoading && servers.length > 0 && !selectedServer) {
       setSelectedServer(servers[0]);

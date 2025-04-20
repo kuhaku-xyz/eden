@@ -7,6 +7,7 @@ import { db, Server, Channel } from "@/lib/db/instant";
 import { ChannelsPanel } from "./channels-panel";
 import { useChatApp } from "@/components/chat-app-context";
 import { id } from "@instantdb/react";
+import { cn } from "@/lib/utils";
 
 export function ServerPanel({
   servers,
@@ -26,13 +27,11 @@ export function ServerPanel({
     setSelectedChannel,
   } = useChatApp();
 
-  // Fetch channels only when a server is selected
   const { isLoading, error, data } = db.useQuery(
     selectedServer ? { channels: { $: { where: { serverId: selectedServer.id } } } } : { channels: {} }
   );
   const channels: Channel[] = selectedServer ? (data?.channels ?? []) : [];
 
-  // Channel creation handler
   const handleCreateChannel = () => {
     if (!selectedServer) return;
     const name = prompt("Enter channel name:");
@@ -54,7 +53,7 @@ export function ServerPanel({
           <Button
             key={server.id}
             variant={selectedServer?.id === server.id ? "secondary" : "ghost"}
-            className="rounded-full w-12 h-12 p-0 flex items-center justify-center overflow-hidden border"
+            className={cn("rounded-full w-10 h-10 p-0 flex items-center justify-center overflow-hidden border", selectedServer?.id === server.id && "ring-2 ring-primary")}
             onClick={() => {
               setSelectedServer(server);
               setSelectedChannel(null);

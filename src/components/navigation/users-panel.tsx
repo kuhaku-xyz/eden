@@ -7,6 +7,7 @@ import React, { useEffect } from "react";
 import { db } from "@/lib/db/instant";
 import { Account } from "@lens-protocol/client";
 import { useChatApp } from "../chat-app-context";
+import { UserMenu } from "./user-menu";
 
 interface UsersPanelProps {
   isUsersCollapsed: boolean;
@@ -16,7 +17,6 @@ interface UsersPanelProps {
 
 export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanelProps) {
   const { selectedServer, account } = useChatApp();
-
   const server = db.room();
   const { user: myPresence, peers, publishPresence } = db.rooms.usePresence(server);
 
@@ -34,14 +34,12 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
     console.log('selectedServer', selectedServer);
   }, [selectedServer]);
 
-  /// deduplicate users
   const users = [
-    ...new Set(
-      [
-        ...Object.values(peers || {}),
-      ].filter(Boolean)
-    ),
-  ];
+    ...Object.values(peers || {})
+      .filter((peer: any) =>
+        peer && peer.address !== myPresence?.address
+      )
+  ].filter(Boolean);
 
   return (
     <div
@@ -67,9 +65,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
       </button>
       {!isUsersCollapsed && (
         <>
-          <h2 className="text-lg font-semibold h-14 px-4 py-2 items-center flex border-b truncate">
-            Users
-          </h2>
+          <UserMenu account={account} />
           <ScrollArea className="flex-grow">
             <div className="p-2 space-y-1">
               {users.length === 0 && (

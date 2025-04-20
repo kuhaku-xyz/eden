@@ -20,16 +20,16 @@ export const metadata = {
 
 export default async function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
-    <html lang="en">
-      <Providers>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased m-0 p-0 overflow-hidden`}
-        >
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased m-0 p-0 overflow-hidden`}
+      >
+        <Providers>
           <main className="h-screen w-screen overflow-hidden bg-background">
             {children}
           </main>
-        </body>
-      </Providers>
+        </Providers>
+      </body>
     </html>
   );
 }
