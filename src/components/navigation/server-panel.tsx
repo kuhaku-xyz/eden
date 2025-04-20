@@ -47,7 +47,7 @@ export function ServerPanel({
 
   return (
     <div className="flex flex-row h-full">
-      <div className="flex flex-col items-center py-2 px-1 bg-muted/40 border-r space-y-2 min-w-[60px] h-full">
+      <div className="flex flex-col items-center py-2 px-1 bg-muted/40 border-r gap-3 min-w-[60px] h-full">
         {serversLoading && <div className="text-xs text-muted-foreground">...</div>}
         {servers.map((server) => (
           <Button
@@ -69,7 +69,7 @@ export function ServerPanel({
             </Avatar>
           </Button>
         ))}
-        <Button variant="ghost" size="icon" title="Create Server" className="rounded-full w-10 h-10 mt-2" onClick={onCreateServerClick}>
+        <Button variant="ghost" size="icon" title="Create Server" className="rounded-full w-10 h-10" onClick={onCreateServerClick}>
           <PlusCircle className="h-5 w-5" />
         </Button>
       </div>

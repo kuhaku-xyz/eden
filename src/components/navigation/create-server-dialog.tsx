@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -31,10 +31,26 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { account } = useChatApp();
 
+  const isValidEVMAddress = (address: string) => {
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
+  };
+
+  useEffect(() => {
+    if (isValidEVMAddress(appAddress)) {
+      handleFetchApp();
+    }
+  }, [appAddress]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAppAddress(value);
+    setAppData(null);
+    setFetchError(null);
+  };
+
   const handleFetchApp = async () => {
     setFetchingApp(true);
     setFetchError(null);
-    setAppData(null);
     try {
       const lens = await getLensClient();
       const app = await fetchApp(lens, { app: appAddress });
@@ -73,24 +89,22 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Server</DialogTitle>
+          <DialogTitle>Add Server</DialogTitle>
           <DialogDescription>
-            Enter a Lens app address to create a server from its data.
+            Enter a Lens app address to add it as a server.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="">
           <Input
             placeholder="App address (0x...)"
             value={appAddress}
-            onChange={e => setAppAddress(e.target.value)}
+            onChange={handleInputChange}
             disabled={fetchingApp}
           />
-          <Button onClick={handleFetchApp} disabled={!appAddress || fetchingApp}>
-            {fetchingApp ? "Fetching..." : "Fetch App Data"}
-          </Button>
+          {fetchingApp && <div className="text-sm text-muted-foreground">Fetching app data...</div>}
           {fetchError && <div className="text-red-500 text-sm">{fetchError}</div>}
           {appData && (
-            <div className="flex items-center gap-2 p-2 border rounded">
+            <div className="flex items-center gap-2 p-4 border border-t-0 rounded-t-none -mt-1 pt-5 rounded-md">
               {appData.metadata?.logo && <img src={appData.metadata?.logo} alt="icon" className="w-8 h-8 rounded-full" />}
               <div>
                 <div className="font-semibold">{appData.metadata?.name}</div>
@@ -103,7 +117,7 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
           <DialogClose asChild>
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleCreate} disabled={!appData}>Create Server</Button>
+          <Button onClick={handleCreate} disabled={!appData}>Add Server</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
