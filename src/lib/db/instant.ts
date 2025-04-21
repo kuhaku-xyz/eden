@@ -6,6 +6,8 @@ const APP_ID = process.env.NEXT_PUBLIC_INSTANTDB_APP_ID || "";
 export type Server = InstaQLEntity<typeof schema, "servers">;
 export type Channel = InstaQLEntity<typeof schema, "channels">;
 export type Message = InstaQLEntity<typeof schema, "messages">;
+export type User = InstaQLEntity<typeof schema, "users">;
+export type ServerMember = InstaQLEntity<typeof schema, "serverMembers">;
 
 export const db = init({ appId: APP_ID, schema });
 export { id }; 

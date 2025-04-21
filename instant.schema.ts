@@ -4,13 +4,6 @@ import { i } from "@instantdb/react";
 
 const schema = i.schema({
   entities: {
-    // $files: i.entity({
-    //   path: i.string().unique().indexed(),
-    //   url: i.any(),
-    // }),
-    // $users: i.entity({
-    //   email: i.string().unique().indexed(),
-    // }),
     servers: i.entity({
       address: i.string().unique().indexed(),
       name: i.string().indexed(),
@@ -35,6 +28,11 @@ const schema = i.schema({
       owner: i.string().indexed(),
       username: i.string().indexed(),
     }),
+    serverMembers: i.entity({
+      userId: i.string().indexed(),
+      serverId: i.string().indexed(),
+      joinedAt: i.number().indexed(),
+    }),
   },
   links: {
     serverChannels: {
@@ -44,6 +42,14 @@ const schema = i.schema({
     channelMessages: {
       forward: { on: "messages", has: "one", label: "channel" },
       reverse: { on: "channels", has: "many", label: "messages" },
+    },
+    userServers: {
+      forward: { on: "serverMembers", has: "one", label: "user" },
+      reverse: { on: "users", has: "many", label: "serverMemberships" },
+    },
+    serverMembers: {
+      forward: { on: "serverMembers", has: "one", label: "server" },
+      reverse: { on: "servers", has: "many", label: "members" },
     },
   },
 });

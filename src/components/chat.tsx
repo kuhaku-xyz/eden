@@ -45,7 +45,7 @@ function ChatContent() {
   return (
     <>
       <CreateServerDialog open={createServerOpen} onOpenChange={setCreateServerOpen} />
-      <ResizablePanelGroup direction="horizontal" className="min-h-screen w-full rounded-lg border">
+      <ResizablePanelGroup direction="horizontal" className="min-h-screen w-full">
         <ResizablePanel
           defaultSize={25}
           collapsible
