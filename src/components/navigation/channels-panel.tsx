@@ -23,7 +23,7 @@ export function ChannelsPanel({
 }: ChannelsPanelProps) {
   const { selectedChannel, setSelectedChannel, selectedServer } = useChatApp();
   return (
-    <div className="flex flex-col flex-1 h-full space-y-2">
+    <div className="flex flex-col flex-1 h-full bg-primary/5 space-y-2">
       {!isCollapsed && (
         <div className="flex-grow rounded">
           <div className="flex items-center h-14 px-4 py-2 justify-between border-b">

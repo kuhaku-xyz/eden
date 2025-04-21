@@ -44,7 +44,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
 
   return (
     <div
-      className={`flex flex-col border-l bg-background h-full transition-all duration-300 ease-in-out ${isUsersCollapsed ? 'min-w-0 max-w-[2rem]' : 'w-72 min-w-[16rem] max-w-[18rem]'}`}
+      className={`flex flex-col border-l bg-primary/5 h-full transition-all duration-300 ease-in-out ${isUsersCollapsed ? 'min-w-0 max-w-[2rem]' : 'w-72 min-w-[16rem] max-w-[18rem]'}`}
       style={{ position: 'relative' }}
     >
       <Button

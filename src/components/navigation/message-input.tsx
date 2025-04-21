@@ -28,29 +28,33 @@ export function MessageInput() {
   };
 
   return (
-    <form onSubmit={handleSendMessage} className="flex w-full gap-2 items-center">
-      <Input
-        type="text"
-        placeholder={selectedChannel ? "Type your message..." : "Select a channel to chat"}
-        className="flex-1"
-        disabled={!selectedChannel}
-        autoComplete="off"
-        value={messageInput}
-        onChange={(e) => setMessageInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            handleSendMessage(e as any);
-          }
-        }}
-      />
-      <Button
-        type="submit"
-        disabled={!selectedChannel || !messageInput.trim()}
-        title="Send Message"
-      >
-        <Send className="h-4 w-4" />
-        <span className="sr-only">Send Message</span>
-      </Button>
+    <form onSubmit={handleSendMessage} className="flex w-full items-center">
+      <div className="relative w-full rounded-full shadow-lg bg-background/80 backdrop-blur-sm border border-muted/30 p-1.5 flex items-center">
+        <Input
+          type="text"
+          placeholder={selectedChannel ? "Type your message..." : "Select a channel to chat"}
+          className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3"
+          disabled={!selectedChannel}
+          autoComplete="off"
+          value={messageInput}
+          onChange={(e) => setMessageInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              handleSendMessage(e as any);
+            }
+          }}
+        />
+        <Button
+          type="submit"
+          disabled={!selectedChannel || !messageInput.trim()}
+          title="Send Message"
+          className="rounded-full aspect-square p-2 h-9 w-9"
+          variant="secondary"
+        >
+          <Send className="h-4 w-4" />
+          <span className="sr-only">Send Message</span>
+        </Button>
+      </div>
     </form>
   );
 } 

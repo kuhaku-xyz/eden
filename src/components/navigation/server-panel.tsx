@@ -47,7 +47,7 @@ export function ServerPanel({
 
   return (
     <div className="flex flex-row h-full">
-      <div className="flex flex-col items-center py-2 px-1 bg-muted/40 border-r gap-3 min-w-[60px] h-full">
+      <div className="flex flex-col items-center py-2 px-1 bg-primary/10 border-r gap-3 min-w-[60px] h-full">
         {serversLoading && <div className="text-xs text-muted-foreground">...</div>}
         {servers.map((server) => (
           <Button

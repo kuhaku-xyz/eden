@@ -60,9 +60,9 @@ function ChatContent() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
-          <div className="flex flex-col w-full h-full" style={{ marginRight: isUsersCollapsed ? 0 : 280 }}>
+          <div className="flex flex-col w-full h-full relative" style={{ marginRight: isUsersCollapsed ? 0 : 280 }}>
             <ChatHeader />
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-auto relative">
               {selectedChannel ? (
                 <MessagesArea />
               ) : (
@@ -78,7 +78,7 @@ function ChatContent() {
               )}
             </div>
             {/* Message Input */}
-            <div className="border-t p-3 bg-background">
+            <div className="p-3 pb-4 absolute bottom-0 left-0 right-0 z-10 bg-transparent">
               <MessageInput />
             </div>
           </div>

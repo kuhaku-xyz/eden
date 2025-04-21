@@ -82,8 +82,8 @@ export function MessagesArea() {
 
   return (
     <ScrollArea className="h-full w-full" type="auto">
-      <div className="px-4 pt-2 pb-2">
-        {isLoading && <div className="text-xs text-muted-foreground text-center p-4">Loading messages...</div>}
+      <div className="px-4 pt-2 pb-2 pb-16">
+        {isLoading && <div className="text-xs text-muted-foreground pb-16 text-center p-4">Loading messages...</div>}
         {error && <div className="text-xs text-red-500 text-center p-4">Error loading messages: {error.message}</div>}
         {messageGroups.length === 0 && !isLoading && (
           <div className="text-xs text-muted-foreground italic text-center p-4">No messages yet.</div>
@@ -93,7 +93,7 @@ export function MessagesArea() {
           <div key={group.senderId + groupIndex} className={`relative flex gap-2 ${group.isSelf ? "justify-end" : "justify-start"} mb-2`}>
 
             {!group.isSelf && (
-              <div className="sticky bottom-2 self-end flex-shrink-0">
+              <div className="sticky bottom-18 self-end flex-shrink-0">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={group.account?.metadata?.picture} />
                   <AvatarFallback>{group.account?.username?.localName?.charAt(0)?.toUpperCase() || group.senderId?.slice(2, 3)?.toUpperCase() || '?'}</AvatarFallback>
@@ -124,7 +124,7 @@ export function MessagesArea() {
             </div>
 
             {group.isSelf && (
-              <div className="sticky bottom-2 self-end flex-shrink-0">
+              <div className="sticky bottom-18 self-end flex-shrink-0">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src={group.account?.metadata?.picture} />
                   <AvatarFallback>{group.account?.username?.localName?.charAt(0)?.toUpperCase() || 'Me'}</AvatarFallback>
