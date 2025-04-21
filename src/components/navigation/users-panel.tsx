@@ -76,7 +76,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
           <ScrollArea className="flex-grow">
             <div className="p-2 space-y-1">
               {users.length === 0 && (
-                <div className="text-muted-foreground text-sm p-2">No users online</div>
+                <div className="text-muted-foreground text-sm text-center p-2">No users online</div>
               )}
               {users.map((user: any, idx: number) => (
                 <div key={user.address || idx} className="flex items-center gap-2 p-1.5 rounded text-sm hover:bg-muted">

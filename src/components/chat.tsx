@@ -36,8 +36,6 @@ function ChatContent() {
   const { isLoading: serversLoading, error: serversError, data: serversData } = db.useQuery({ servers: {} });
   const servers: Server[] = serversData?.servers ?? [];
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!serversLoading && servers.length > 0 && !selectedServer) {
       setSelectedServer(servers[0]);
@@ -64,9 +62,9 @@ function ChatContent() {
         <ResizablePanel defaultSize={50}>
           <div className="flex flex-col w-full h-full" style={{ marginRight: isUsersCollapsed ? 0 : 280 }}>
             <ChatHeader />
-            <div className="flex-1 overflow-hidden p-4">
+            <div className="flex-1 overflow-hidden">
               {selectedChannel ? (
-                <MessagesArea messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>} />
+                <MessagesArea />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4 text-center">
                   <MessageSquare className="h-12 w-12 mb-4 text-gray-300 dark:text-gray-600" />

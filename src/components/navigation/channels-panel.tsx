@@ -21,13 +21,13 @@ export function ChannelsPanel({
   channelsError,
   isCollapsed
 }: ChannelsPanelProps) {
-  const { selectedChannel, setSelectedChannel } = useChatApp();
+  const { selectedChannel, setSelectedChannel, selectedServer } = useChatApp();
   return (
     <div className="flex flex-col flex-1 h-full space-y-2">
       {!isCollapsed && (
         <div className="flex-grow rounded">
           <div className="flex items-center h-14 px-4 py-2 justify-between border-b">
-            <h2 className="text-base font-semibold truncate">Channels</h2>
+            <h2 className="text-base font-semibold truncate">{selectedServer?.name}</h2>
             <Button variant="ghost" size="sm" title="Create Channel" onClick={handleCreateChannel}>
               <PlusCircle className="h-6 w-6" />
             </Button>
