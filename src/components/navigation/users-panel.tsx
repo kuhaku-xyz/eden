@@ -1,6 +1,6 @@
 "use client";
 
-import { User2Icon, User as UserIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, User2Icon, User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React, { useEffect } from "react";
@@ -8,6 +8,7 @@ import { db } from "@/lib/db/instant";
 import { Account } from "@lens-protocol/client";
 import { useChatApp } from "../chat-app-context";
 import { UserMenu } from "./user-menu";
+import { Button } from "@/components/ui/button";
 
 interface UsersPanelProps {
   isUsersCollapsed: boolean;
@@ -43,26 +44,32 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
 
   return (
     <div
-      className={`flex flex-col border-l bg-background h-full transition-all duration-300 ease-in-out ${isUsersCollapsed ? 'w-8 min-w-[2rem] max-w-[2rem]' : 'w-72 min-w-[16rem] max-w-[18rem]'}`}
+      className={`flex flex-col border-l bg-background h-full transition-all duration-300 ease-in-out ${isUsersCollapsed ? 'min-w-0 max-w-[2rem]' : 'w-72 min-w-[16rem] max-w-[18rem]'}`}
       style={{ position: 'relative' }}
     >
-      <button
-        className="absolute -left-4 top-4 z-10 bg-background border rounded-full shadow p-1 hover:bg-muted transition"
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`absolute -left-12 top-2 z-10 bg-background border rounded-full shadow hover:bg-muted transition`}
         onClick={() => setIsUsersCollapsed(!isUsersCollapsed)}
         title={isUsersCollapsed ? 'Expand Users Panel' : 'Collapse Users Panel'}
         type="button"
       >
         <span className="sr-only">{isUsersCollapsed ? 'Expand' : 'Collapse'} Users Panel</span>
-        <svg
-          className={`w-4 h-4 transition-transform ${isUsersCollapsed ? '' : 'rotate-180'}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+        {isUsersCollapsed ? (
+          <>
+            {account?.metadata?.picture ? (
+              <img src={account?.metadata?.picture} alt={account?.username?.localName} className="w-full h-full rounded-full" />
+            ) : (
+              <User2Icon className="w-4 h-4" />
+            )}
+          </>
+        ) : (
+          <>
+            <ChevronRight className="w-4 h-4" />
+          </>
+        )}
+      </Button>
       {!isUsersCollapsed && (
         <>
           <UserMenu account={account} />
