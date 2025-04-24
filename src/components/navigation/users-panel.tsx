@@ -175,7 +175,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
                     return (
                       <div
                         key={user.address || idx}
-                        className="flex items-center gap-2 p-2 rounded-md text-sm hover:bg-muted bg-primary/5"
+                        className="flex items-center gap-2 p-2 rounded-md text-sm hover:bg-muted "
                       >
                         <div className="relative">
                           <Avatar className="h-6 w-6">
@@ -184,7 +184,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
                               {displayName?.charAt(0)?.toUpperCase() || user.address?.slice(2, 3)?.toUpperCase() || '?'}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background" title="Online"></div>
+                          <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-background" title="Online"></div>
                         </div>
                         <span className="truncate" title={displayName}>
                           {displayName}
@@ -201,7 +201,6 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
               {offlineUsers.length > 0 && (
                 <div className="space-y-1">
                   {offlineUsers.map((user: any, idx: number) => {
-                    // Get the Lens account for this user if available
                     const lensAccount = accountsByAddress[user.address];
                     const avatarSrc = lensAccount?.metadata?.picture || user.avatar;
                     const displayName = user.name || lensAccount?.username?.localName || user.address;
