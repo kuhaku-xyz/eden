@@ -1,5 +1,6 @@
 "use client";
 
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -100,9 +101,6 @@ export function Login() {
                 <Button onClick={show} className="w-full">
                   Connect Wallet
                 </Button>
-                <p className="text-xs text-muted-foreground">
-                  Connect your wallet to get started.
-                </p>
               </>
             );
           }
@@ -129,8 +127,8 @@ export function Login() {
                   <DialogHeader>
                     <DialogTitle>Select Lens Account</DialogTitle>
                   </DialogHeader>
-                  <ScrollArea className="flex flex-col gap-2 py-4 max-h-[400px] pr-4">
-                    <div className="flex flex-col gap-2">
+                  <ScrollArea className="flex flex-wrap gap-2 py-4 max-h-[400px] pr-4">
+                    <div className="flex flex-wrap gap-2">
                       {accountsLoading && <p>Loading accounts...</p>}
                       {!accountsLoading && availableAccounts?.items.length === 0 && (
                         <p className="text-sm text-muted-foreground">

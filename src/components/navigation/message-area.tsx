@@ -110,13 +110,15 @@ export function MessagesArea() {
                   <div key={msg.id} className={`flex items-center gap-2 w-full ${group.isSelf ? "flex-row-reverse justify-start" : "flex-row justify-start"}`}>
                     <div className={`p-2 px-3 rounded-lg ${group.isSelf ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
                       {isFirstInGroup && (
-                        <p className={`text-xs font-semibold mb-0.5`}>{group.account?.username?.localName || msg.sender || 'Unknown User'}</p>
+                        <p className={`text-xs font-semibold ${group.isSelf ? 'text-left' : 'text-left'}`}>{group.account?.username?.localName || msg.sender || 'Unknown User'}</p>
                       )}
-                      <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                      <div className="flex flex-row">
+                        <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                        <span className={`text-xs text-muted-foreground whitespace-nowrap flex items-end text-right ml-2 ${group.isSelf ? 'text-secondary/40' : ''}`}>
+                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap self-end">
-                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                    </span>
                     {!isLastInGroup && <div className="w-12 flex-shrink-0"></div>}
                   </div>
                 );

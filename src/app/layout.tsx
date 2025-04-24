@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_JP, Yuji_Boku } from "next/font/google";
 import "../../public/globals.css";
 import { Providers } from "@/components/providers";
 
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Eden",
-  description: "Chat on lens in the garden of Eden",
+  description: "Chat in the garden of Eden",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
