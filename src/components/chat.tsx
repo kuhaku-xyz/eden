@@ -33,15 +33,6 @@ function ChatContent() {
   const [isUsersCollapsed, setIsUsersCollapsed] = useState(false);
   const [createServerOpen, setCreateServerOpen] = useState(false);
 
-  const { isLoading: serversLoading, error: serversError, data: serversData } = db.useQuery({ servers: {} });
-  const servers: Server[] = serversData?.servers ?? [];
-
-  useEffect(() => {
-    if (!serversLoading && servers.length > 0 && !selectedServer) {
-      setSelectedServer(servers[0]);
-    }
-  }, [serversLoading, servers, selectedServer, setSelectedServer]);
-
   return (
     <>
       <CreateServerDialog open={createServerOpen} onOpenChange={setCreateServerOpen} />
@@ -52,8 +43,6 @@ function ChatContent() {
           minSize={20}
           maxSize={50} collapsedSize={7} onCollapse={() => setIsCollapsed(true)} onExpand={() => setIsCollapsed(false)} className={`${isCollapsed ? "min-w-[50px]" : "min-w-[250px]"}`}>
           <ServerPanel
-            servers={servers}
-            serversLoading={serversLoading}
             onCreateServerClick={() => setCreateServerOpen(true)}
             isCollapsed={isCollapsed}
           />

@@ -12,13 +12,9 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export function ServerPanel({
-  servers,
-  serversLoading,
   onCreateServerClick,
   isCollapsed,
 }: {
-  servers: Server[];
-  serversLoading: boolean;
   onCreateServerClick: () => void;
   isCollapsed: boolean;
 }) {
@@ -32,26 +28,22 @@ export function ServerPanel({
 
   const [showServerBrowser, setShowServerBrowser] = useState(false);
   const { data: userData } = db.useQuery(
-    account ? { users: { $: { where: { address: account.address } } } } : { users: {} }
+    account ? { users: { $: { where: { address: account.address } } } } : {}
   );
   const currentUser = userData?.users?.[0];
 
   const { data: membershipData, isLoading: membershipLoading } = db.useQuery(
-    currentUser ? { serverMembers: { $: { where: { userId: currentUser.id } } } } : { serverMembers: {} }
+    currentUser ? { serverMembers: { $: { where: { userId: currentUser.id } } } } : {}
   );
   const joinedServerIds = new Set((membershipData?.serverMembers || []).map(member => member.serverId));
 
   const { data: joinedServersData, isLoading: joinedServersLoading } = db.useQuery(
     joinedServerIds.size > 0
       ? { servers: { $: { where: { id: { $in: Array.from(joinedServerIds) } } } } }
-      : { servers: { $: { limit: 0 } } } // Empty query when no joined servers
+      : {}
   );
   const joinedServers = joinedServersData?.servers || [];
 
-  const { isLoading, error, data } = db.useQuery(
-    selectedServer ? { channels: { $: { where: { serverId: selectedServer.id } } } } : { channels: {} }
-  );
-  const channels: Channel[] = selectedServer ? (data?.channels ?? []) : [];
 
   const { data: allServersData } = db.useQuery({ servers: {} });
   const allServers = allServersData?.servers || [];
@@ -126,12 +118,16 @@ export function ServerPanel({
 
         {selectedServer && (
           <ChannelsPanel
-            channels={channels}
             handleCreateChannel={handleCreateChannel}
-            channelsLoading={isLoading}
-            channelsError={error}
             isCollapsed={isCollapsed}
           />
+        )}
+        {!selectedServer && (
+          <div className="flex flex-col flex-1 h-full bg-primary/5 space-y-2">
+            <div className="flex items-center h-14 px-4 py-2 justify-between border-b">
+              <h2 className="text-base font-semibold truncate">Select a server</h2>
+            </div>
+          </div>
         )}
       </div>
 
