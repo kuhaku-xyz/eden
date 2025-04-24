@@ -5,6 +5,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlusCircle, Hash } from "lucide-react";
 import { db, type Channel } from "@/lib/db/instant";
 import { useChatApp } from "../chat-app-context";
+import { fetchAdminsFor } from "@lens-protocol/client/actions";
+import { getLensClient } from "@/lib/lens/client";
+import { useAuthenticatedUser } from "@lens-protocol/react";
+import { useEffect, useState } from "react";
 
 export type ChannelsPanelProps = {
   handleCreateChannel: () => void;
@@ -16,9 +20,38 @@ export function ChannelsPanel({
   isCollapsed
 }: ChannelsPanelProps) {
   const { selectedChannel, setSelectedChannel, selectedServer } = useChatApp();
+  const { data: user } = useAuthenticatedUser();
+  const [admins, setAdmins] = useState<string[]>([]);
 
   const { isLoading, error, data } = db.useQuery(selectedServer ? { channels: { $: { where: { serverId: selectedServer.id } } } } : {});
 
+  useEffect(() => {
+    async function fetchAdmins() {
+      if (!selectedServer?.address) return;
+
+      try {
+        const lens = await getLensClient();
+        const result = await fetchAdminsFor(lens, {
+          address: selectedServer.address,
+        });
+
+        if (result.isOk()) {
+          const adminAddresses = result.value.items.map(admin => admin.account.address.toLowerCase());
+          setAdmins(adminAddresses);
+        } else {
+          console.error("Error fetching admins:", result.error);
+          setAdmins([]);
+        }
+      } catch (error) {
+        console.error("Error fetching admins:", error);
+        setAdmins([]);
+      }
+    }
+
+    fetchAdmins();
+  }, [selectedServer?.address]);
+
+  const isAdmin = user?.address && admins.includes(user.address);
   const channels: Channel[] = selectedServer ? (data?.channels ?? []) : [];
 
   if (!selectedServer && !selectedChannel) {
@@ -38,9 +71,11 @@ export function ChannelsPanel({
         <div className="flex-grow rounded">
           <div className="flex items-center h-14 px-4 py-2 justify-between border-b">
             <h2 className="text-base font-semibold truncate">{selectedServer?.name}</h2>
-            <Button variant="ghost" size="sm" title="Create Channel" onClick={handleCreateChannel}>
-              <PlusCircle className="h-6 w-6" />
-            </Button>
+            {isAdmin && (
+              <Button variant="ghost" size="sm" className="px-1" title="Create Channel" onClick={handleCreateChannel}>
+                <PlusCircle className="h-6 w-6" />
+              </Button>
+            )}
           </div>
           <ScrollArea className="h-[calc(100%-40px)]">
             <div className="flex flex-col gap-1 p-2">
@@ -66,9 +101,11 @@ export function ChannelsPanel({
       {/* Collapsed Sidebar */}
       {isCollapsed && (
         <div className="flex flex-col items-center space-y-4 mt-4">
-          <Button variant="ghost" size="icon" title="Create Channel" onClick={handleCreateChannel}>
-            <PlusCircle className="h-5 w-5" />
-          </Button>
+          {isAdmin && (
+            <Button variant="ghost" size="icon" title="Create Channel" onClick={handleCreateChannel}>
+              <PlusCircle className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       )}
     </div>
