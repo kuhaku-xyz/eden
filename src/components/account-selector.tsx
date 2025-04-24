@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Account } from "@lens-protocol/client";
 import { useLogin, useAccountsAvailable } from "@lens-protocol/react";
-import { useWalletClient } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import {
   Dialog,
   DialogContent,
@@ -34,41 +34,51 @@ export function AccountSelector({
   currentAccount = null,
   onSuccess,
   trigger,
-  updateDatabase = false
+  updateDatabase = true
 }: AccountSelectorProps) {
   const { data: walletClient } = useWalletClient();
   const { data: availableAccounts, loading: accountsLoading } = useAccountsAvailable({ managedBy: walletClient?.account.address });
   const { execute: authenticate, loading: authenticateLoading } = useLogin();
   const router = useRouter();
+  const wallet = useAccount()
 
-  const handleSelectAccount = async (accountAddress: string) => {
+  const handleSelectAccount = async (account: Account) => {
     if (!walletClient) return;
     try {
-      await authenticate({
+      const isOwner = wallet.address === account.owner
+      const authRequest = isOwner ? {
         accountOwner: {
-          account: accountAddress,
+          account: account.address,
           app: process.env.NEXT_PUBLIC_APP_ADDRESS,
           owner: walletClient.account.address,
-        },
+        }
+      } : {
+        accountManager: {
+          account: account.address,
+          app: process.env.NEXT_PUBLIC_APP_ADDRESS,
+          manager: walletClient.account.address,
+        }
+      }
+
+      await authenticate({
+        ...authRequest,
         signMessage: async (message: string) => {
-          // @ts-ignore
           return await walletClient.signMessage({ message });
         },
       });
 
-      // If updateDatabase is true, update the user in the database
       if (updateDatabase) {
         try {
           const selectedAccount = availableAccounts?.items.find(acc =>
-            acc.account.address === accountAddress
+            acc.account.address === account.address
           )?.account;
 
           if (selectedAccount) {
             const username = selectedAccount.username?.localName || "";
             try {
               await db.transact(
-                db.tx.users[lookup('address', accountAddress)].update({
-                  address: accountAddress,
+                db.tx.users[lookup('address', account.address)].update({
+                  address: account.address,
                   owner: walletClient.account.address,
                   username,
                 })
@@ -78,7 +88,7 @@ export function AccountSelector({
               try {
                 await db.transact(
                   db.tx.users[id()].update({
-                    address: accountAddress,
+                    address: account.address,
                     owner: walletClient.account.address,
                     username,
                   })
@@ -95,9 +105,8 @@ export function AccountSelector({
 
       onOpenChange(false);
 
-      // Pass the selected account to onSuccess if available
       const selectedAccount = availableAccounts?.items.find(acc =>
-        acc.account.address === accountAddress
+        acc.account.address === account.address
       )?.account;
 
       if (onSuccess) {
@@ -127,7 +136,6 @@ export function AccountSelector({
             )}
             {availableAccounts && availableAccounts.items.length > 0 && (
               availableAccounts.items.map((acc) => {
-                // Check if this account is the currently selected one
                 const isCurrentAccount = currentAccount ? acc.account.address === currentAccount.address : false;
 
                 return (
@@ -135,7 +143,7 @@ export function AccountSelector({
                     key={acc.account.address}
                     variant="outline"
                     disabled={authenticateLoading || isCurrentAccount}
-                    onClick={() => handleSelectAccount(acc.account.address)}
+                    onClick={() => handleSelectAccount(acc.account)}
                     className="flex flex-col items-center h-auto py-3 px-2"
                   >
                     <Avatar className="w-10 h-10 mb-2">

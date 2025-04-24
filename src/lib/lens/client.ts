@@ -6,7 +6,7 @@ const isServer = typeof window === "undefined";
 
 const publicClient = PublicClient.create({
   environment: env.NEXT_PUBLIC_ENVIRONMENT === "development" ? testnet : mainnet,
-  origin: "https://pingpad.io",
+  origin: "https://eden.kuhaku.xyz",
   storage: isServer ? cookieStorage : clientCookieStorage,
   // apiKey: isServer
   //   ? env.NEXT_PUBLIC_ENVIRONMENT === "development"
