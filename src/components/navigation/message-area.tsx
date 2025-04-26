@@ -3,8 +3,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";
 import type { Message } from "@/lib/db/instant";
-// @ts-ignore TODO: fix account type
-import type { Account } from "@lens-protocol/client"; // Ensure Account is imported
+import type { Account } from "@lens-protocol/client";
 import { db } from "@/lib/db/instant";
 import { useChatApp } from "@/components/chat-app-context";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";

@@ -5,10 +5,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlusCircle, Hash } from "lucide-react";
 import { db, type Channel } from "@/lib/db/instant";
 import { useChatApp } from "../chat-app-context";
-import { fetchAdminsFor } from "@lens-protocol/client/actions";
+import { fetchAdminsFor, fetchApp } from "@lens-protocol/client/actions";
 import { getLensClient } from "@/lib/lens/client";
 import { useAuthenticatedUser } from "@lens-protocol/react";
 import { useEffect, useState } from "react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
+import { useAccount } from "wagmi";
 
 export type ChannelsPanelProps = {
   handleCreateChannel: () => void;
@@ -22,6 +29,7 @@ export function ChannelsPanel({
   const { selectedChannel, setSelectedChannel, selectedServer } = useChatApp();
   const { data: user } = useAuthenticatedUser();
   const [admins, setAdmins] = useState<string[]>([]);
+  const { address: walletAddress } = useAccount();
 
   const { isLoading, error, data } = db.useQuery(selectedServer ? { channels: { $: { where: { serverId: selectedServer.id } } } } : {});
 
@@ -31,15 +39,25 @@ export function ChannelsPanel({
 
       try {
         const lens = await getLensClient();
-        const result = await fetchAdminsFor(lens, {
+        const adminsResult = await fetchAdminsFor(lens, {
           address: selectedServer.address,
         });
+        const appResult = await fetchApp(lens, {
+          app: selectedServer.address,
+        });
 
-        if (result.isOk()) {
-          const adminAddresses = result.value.items.map(admin => admin.account.address.toLowerCase());
-          setAdmins(adminAddresses);
+        if (adminsResult.isOk() && appResult.isOk()) {
+          const adminAddresses = adminsResult.value.items.map(admin => admin.account.address.toLowerCase());
+          const app = appResult.value;
+          const owner = app?.owner;
+          setAdmins([...adminAddresses, owner.toLowerCase()]);
         } else {
-          console.error("Error fetching admins:", result.error);
+          if (adminsResult.isErr()) {
+            console.error("Error fetching admins:", adminsResult.error);
+          }
+          if (appResult.isErr()) {
+            console.error("Error fetching app:", appResult.error);
+          }
           setAdmins([]);
         }
       } catch (error) {
@@ -51,8 +69,17 @@ export function ChannelsPanel({
     fetchAdmins();
   }, [selectedServer?.address]);
 
-  const isAdmin = user?.address && admins.includes(user.address);
+  const isAdmin = (user?.address && (admins.includes(user.address))) || (walletAddress && (admins.includes(walletAddress.toLowerCase())));
+  console.log(admins, walletAddress)
   const channels: Channel[] = selectedServer ? (data?.channels ?? []) : [];
+
+  const handleDeleteChannel = (channelId: string) => {
+    console.log("Attempting to delete channel:", channelId);
+    db.transact(db.tx.channels[channelId].delete());
+    if (selectedChannel?.id === channelId) {
+      setSelectedChannel(null);
+    }
+  };
 
   if (!selectedServer && !selectedChannel) {
     return (
@@ -85,14 +112,33 @@ export function ChannelsPanel({
                 <div className="text-xs text-muted-foreground italic">No channels yet.</div>
               )}
               {channels.map((channel) => (
-                <Button
-                  key={channel.id}
-                  variant={selectedChannel?.id === channel.id ? "secondary" : "ghost"}
-                  className="w-full justify-start truncate"
-                  onClick={() => setSelectedChannel(channel)}
-                >
-                  <Hash className="h-4 w-4 mr-2 text-muted-foreground" /> {channel.name}
-                </Button>
+                isAdmin ? (
+                  <ContextMenu key={channel.id}>
+                    <ContextMenuTrigger>
+                      <Button
+                        variant={selectedChannel?.id === channel.id ? "secondary" : "ghost"}
+                        className="w-full justify-start truncate"
+                        onClick={() => setSelectedChannel(channel)}
+                      >
+                        <Hash className="h-4 w-4 mr-2 text-muted-foreground" /> {channel.name}
+                      </Button>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem onSelect={() => handleDeleteChannel(channel.id)} className="text-red-600">
+                        Delete Channel
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                ) : (
+                  <Button
+                    key={channel.id}
+                    variant={selectedChannel?.id === channel.id ? "secondary" : "ghost"}
+                    className="w-full justify-start truncate"
+                    onClick={() => setSelectedChannel(channel)}
+                  >
+                    <Hash className="h-4 w-4 mr-2 text-muted-foreground" /> {channel.name}
+                  </Button>
+                )
               ))}
             </div>
           </ScrollArea>

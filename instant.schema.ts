@@ -7,12 +7,12 @@ const schema = i.schema({
     servers: i.entity({
       address: i.string().unique().indexed(),
       name: i.string().indexed(),
-      icon: i.string().optional(), // URL or identifier for the server icon
+      icon: i.string().optional(),
       createdAt: i.number().indexed(),
       owner: i.string().indexed(),
     }),
     channels: i.entity({
-      name: i.string().unique().indexed(),
+      name: i.string().indexed(),
       serverId: i.string().indexed(),
       createdAt: i.number().indexed(),
     }),
