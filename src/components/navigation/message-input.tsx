@@ -8,6 +8,7 @@ import { db } from "@/lib/db/instant";
 import { useChatApp } from "@/components/chat-app-context";
 import { id } from "@instantdb/react";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
+import { ScrollArea } from "../ui/scroll-area";
 
 export function MessageInput() {
   const { selectedChannel, account } = useChatApp();
@@ -89,11 +90,11 @@ export function MessageInput() {
           {showEmojiPicker && (
             <div
               ref={emojiPickerRef}
-              className="absolute right-0 bottom-full mb-2 z-50 bg-popover border rounded-md shadow-md"
+              className="absolute right-8 bottom-full mb-2 z-52 bg-popover border rounded-md shadow-md"
             >
               <div className="w-80">
                 <EmojiPicker
-                  className="border border-zinc-200 dark:border-zinc-800 rounded-lg"
+                  className="border border-border rounded-lg"
                   emojisPerRow={12}
                   emojiSize={28}
                   onEmojiSelect={handleEmojiSelect}
@@ -101,7 +102,7 @@ export function MessageInput() {
                   <EmojiPicker.Header className="p-2 pb-0">
                     <EmojiPicker.Input
                       autoFocus={true}
-                      className="ml-8 focus:ring-0 ring-0 ring-transparent"
+                      className="focus:ring-0 ring-0 ring-transparent"
                     />
                   </EmojiPicker.Header>
                   <EmojiPicker.Group>
