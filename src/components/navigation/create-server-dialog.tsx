@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchAdminsFor, fetchApp } from "@lens-protocol/client/actions";
 import { getLensClient } from "@/lib/lens/client";
-import { App } from "@lens-protocol/client";
+import { App, evmAddress } from "@lens-protocol/client";
 import { db } from "@/lib/db/instant";
 import { id } from "@instantdb/react";
 import { useChatApp } from "@/components/chat-app-context";
@@ -53,7 +53,7 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
     setFetchError(null);
     try {
       const lens = await getLensClient();
-      const app = await fetchApp(lens, { app: appAddress });
+      const app = await fetchApp(lens, { app: evmAddress(appAddress) });
       if (!app || app.isErr()) {
         setFetchError("App not found: " + app.error.message);
         setFetchingApp(false);

@@ -7,7 +7,7 @@ import { db, type Channel } from "@/lib/db/instant";
 import { useChatApp } from "../chat-app-context";
 import { fetchAdminsFor, fetchApp } from "@lens-protocol/client/actions";
 import { getLensClient } from "@/lib/lens/client";
-import { useAuthenticatedUser } from "@lens-protocol/react";
+import { evmAddress, useAuthenticatedUser } from "@lens-protocol/react";
 import { useEffect, useState } from "react";
 import {
   ContextMenu,
@@ -43,7 +43,7 @@ export function ChannelsPanel({
           address: selectedServer.address,
         });
         const appResult = await fetchApp(lens, {
-          app: selectedServer.address,
+          app: evmAddress(selectedServer.address),
         });
 
         if (adminsResult.isOk() && appResult.isOk()) {

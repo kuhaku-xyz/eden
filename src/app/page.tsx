@@ -1,7 +1,6 @@
 import Chat from "@/components/chat";
 import WelcomeScreen from "@/components/welcome-screen";
 import { getLensClient } from "@/lib/lens/client";
-import { Account } from "@lens-protocol/client";
 import { fetchAccount } from "@lens-protocol/client/actions";
 
 export default async function Home() {
