@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ferrucc-io/emoji-picker": "^0.0.44",
     "@hookform/resolvers": "^5.0.1",
     "@instantdb/react": "^0.18.7",
     "@lens-chain/sdk": "^1.0.3",
