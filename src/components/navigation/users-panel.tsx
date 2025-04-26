@@ -157,7 +157,7 @@ export function UsersPanel({ isUsersCollapsed, setIsUsersCollapsed }: UsersPanel
       {!isUsersCollapsed && (
         <>
           <UserMenu account={account} />
-          <ScrollArea className="flex-grow">
+          <ScrollArea className="flex-grow overflow-y-auto max-h-[calc(100vh-4rem)]">
             <div className="p-2 space-y-1">
               {combinedUsers.length === 0 && (
                 <div className="text-muted-foreground text-sm text-center p-2">No users in this server</div>
