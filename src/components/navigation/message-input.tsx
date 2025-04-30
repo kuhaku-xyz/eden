@@ -6,12 +6,18 @@ import { Send, Smile } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { id } from "@instantdb/react";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
+import { Message } from "@/lib/db/schema";
+import { createImage, useCoState } from "jazz-react";
+import { Chat } from "@/lib/db/schema";
+import { Account, ID } from "jazz-tools";
 
-export function MessageInput() {
+export function MessageInput(props: { chatID: ID<Chat> }) {
+  const chat = useCoState(Chat, props.chatID, { resolve: { $each: true } });
   const [messageInput, setMessageInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
+
 
   const handleEmojiSelect = (emoji: string) => {
     setMessageInput((prev) => prev + emoji);
@@ -20,10 +26,28 @@ export function MessageInput() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    /// TODO: Send message in db
+    if (!chat) return;
+
+    chat.push(Message.create({ text: messageInput }, { owner: chat._owner }));
 
     setMessageInput("");
   };
+
+  const sendImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+
+    if (!file || !chat) return;
+
+    if (file.size > 5000000) {
+      alert("Please upload an image less than 5MB.");
+      return;
+    }
+
+    createImage(file, { owner: chat._owner }).then((image) => {
+      chat.push(Message.create({ text: file.name, image: image }, chat._owner));
+    });
+  };
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,10 +67,18 @@ export function MessageInput() {
     };
   }, []);
 
+  if (!chat) {
+    return (
+      <div className="flex-1 flex justify-center items-center">Loading...</div>
+    );
+  }
+
+
   return (
     <form onSubmit={handleSendMessage} className="flex w-full items-center">
       <div className="relative w-full gap-2 shadow-lg rounded-2xl bg-background/80 backdrop-blur-lg border border-primary/10 p-1.5 flex items-center">
         <div className="flex-1 relative">
+          {/* <ImageInput onImageChange={sendImage} /> */}
           <Input
             type="text"
             placeholder="Type your message..."
@@ -54,6 +86,7 @@ export function MessageInput() {
             autoComplete="off"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
+
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 handleSendMessage(e as any);

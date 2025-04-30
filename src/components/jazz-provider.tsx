@@ -1,22 +1,26 @@
 "use client"
 
 import { User } from "@/lib/db/schema";
-import { JazzProvider } from "jazz-react";
+import { useAccount, useAuthenticatedUser } from "@lens-protocol/react";
+import { JazzProvider as JazzReactProvider } from "jazz-react";
+import { useAccount as useJazzAccount } from "jazz-react";
+import { useEffect } from "react";
 
-export function MyJazzProvider(props: { children: React.ReactNode }) {
-  const JAZZ_PEER = process.env.JAZZ_PEER
+const JAZZ_PEER_KEY = process.env.NEXT_PUBLIC_JAZZ_PEER_KEY
+if (!JAZZ_PEER_KEY) {
+  throw new Error("JAZZ_PEER_KEY is not set")
+}
 
-  if (!JAZZ_PEER || !JAZZ_PEER.startsWith("wss://") && !JAZZ_PEER.startsWith("ws://")) {
-    throw new Error("JAZZ_PEER is not set")
-  }
+export function JazzProvider(props: { children: React.ReactNode }) {
   return (
-    <JazzProvider
-      sync={{ peer: JAZZ_PEER as `wss://${string}` | `ws://${string}` }}
+    <JazzReactProvider
+      sync={{ peer: `wss://cloud.jazz.tools/?key=${JAZZ_PEER_KEY}` }}
       AccountSchema={User}
+      
       defaultProfileName={getRandomUsername()}
     >
       {props.children}
-    </JazzProvider>
+    </JazzReactProvider>
   );
 }
 

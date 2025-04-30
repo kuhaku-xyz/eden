@@ -9,6 +9,7 @@ import { env } from "process";
 import { JSX } from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { ThemeProvider } from "next-themes";
+import { JazzProvider } from "./jazz-provider";
 
 const wagmiConfig = createConfig(
   getDefaultConfig({
@@ -34,7 +35,11 @@ export const Providers = ({ children }: { children: JSX.Element }) => {
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <ConnectKitProvider>
-            <LensProvider client={publicClient}>{children}</LensProvider>
+            <LensProvider client={publicClient}>
+              <JazzProvider>
+                {children}
+              </JazzProvider>
+            </LensProvider>
           </ConnectKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

@@ -1,7 +1,7 @@
-import Chat from "@/components/chat";
 import WelcomeScreen from "@/components/welcome-screen";
 import { getLensClient } from "@/lib/lens/client";
 import { fetchAccount } from "@lens-protocol/client/actions";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const client = await getLensClient();
@@ -16,7 +16,5 @@ export default async function Home() {
     );
   }
 
-  return (
-    <Chat />
-  );
+  redirect("/chat/co_z2KKm6Ai89zzydrsBJpetMi4qrs");
 }
