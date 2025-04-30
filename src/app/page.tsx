@@ -10,11 +10,8 @@ export default async function Home() {
     address: authenticatedUser.address,
   }).unwrapOr(null) : null;
 
-  if (!account) {
     return (
       <WelcomeScreen />
     );
-  }
 
-  redirect("/chat/co_z2KKm6Ai89zzydrsBJpetMi4qrs");
 }

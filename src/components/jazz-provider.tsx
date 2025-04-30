@@ -14,9 +14,8 @@ if (!JAZZ_PEER_KEY) {
 export function JazzProvider(props: { children: React.ReactNode }) {
   return (
     <JazzReactProvider
-      sync={{ peer: `wss://cloud.jazz.tools/?key=${JAZZ_PEER_KEY}` }}
+      sync={{ peer: `wss://cloud.jazz.tools/?key=${JAZZ_PEER_KEY}`, when: "signedUp" }}
       AccountSchema={User}
-      
       defaultProfileName={getRandomUsername()}
     >
       {props.children}
