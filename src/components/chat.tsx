@@ -1,92 +1,61 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MessageSquare, PlusCircle, User as UserIcon, Send, LogIn, Hash } from "lucide-react";
+import { useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { id, db, Server, Channel, Message } from "@/lib/db/instant";
-import type { Account, App } from "@lens-protocol/client";
-import { ServerPanel } from "@/components/navigation/server-panel";
 import { ChatHeader } from "@/components/navigation/chat-header";
-import { MessagesArea } from "@/components/navigation/message-area";
 import { MessageInput } from "@/components/navigation/message-input";
-import { UsersPanel } from "@/components/navigation/users-panel";
 import { CreateServerDialog } from "./navigation/create-server-dialog";
-import { ChatAppProvider, useChatApp } from "@/components/chat-app-context";
+import { useAccount } from "jazz-react";
+import { MessagesArea } from "./navigation/message-area";
+import { Chat } from "@/lib/db/schema";
+import { Group, ID } from "jazz-tools";
+import { useRouter, useParams } from "next/navigation";
+import { useEffect } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-function ChatContent() {
-  const {
-    account,
-    selectedServer,
-    setSelectedServer,
-    selectedChannel,
-    setSelectedChannel,
-  } = useChatApp();
+interface ChatViewProps {
+  chatID?: ID<Chat>;
+}
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isUsersCollapsed, setIsUsersCollapsed] = useState(false);
-  const [createServerOpen, setCreateServerOpen] = useState(false);
+export default function ChatView({ chatID }: ChatViewProps) {
+  const { me } = useAccount();
+  const router = useRouter();
+  const params = useParams();
+  const currentChatID = chatID || (params?.id as ID<Chat>);
+
+  useEffect(() => {
+    if (!currentChatID) {
+      createChat();
+    }
+  }, [currentChatID]);
+
+  const createChat = () => {
+    if (!me) return;
+    const group = Group.create();
+    group.addMember("everyone", "writer");
+    const chat = Chat.create([], group);
+    router.push(`/chat/${chat.id}`);
+  };
 
   return (
     <>
-      <CreateServerDialog open={createServerOpen} onOpenChange={setCreateServerOpen} />
       <ResizablePanelGroup direction="horizontal" className="min-h-screen w-full">
-        <ResizablePanel
-          defaultSize={25}
-          collapsible
-          minSize={20}
-          maxSize={50} collapsedSize={7} onCollapse={() => setIsCollapsed(true)} onExpand={() => setIsCollapsed(false)} className={`${isCollapsed ? "min-w-[50px]" : "min-w-[250px]"}`}>
-          <ServerPanel
-            onCreateServerClick={() => setCreateServerOpen(true)}
-            isCollapsed={isCollapsed}
-          />
-        </ResizablePanel>
-        <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
-          <div className="flex flex-col w-full h-full relative" style={{ marginRight: isUsersCollapsed ? 0 : 280 }}>
+          <div className="flex flex-col w-full h-full relative overflow-hidden">
             <ChatHeader />
-            <div className="flex-1 overflow-auto relative">
-              {selectedChannel ? (
-                <MessagesArea />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4 text-center">
-                  <MessageSquare className="h-12 w-12 mb-4 text-gray-300 dark:text-gray-600" />
-                  <h3 className="text-lg font-semibold mb-1">
-                    Select a channel to start chatting
-                  </h3>
-                  <p className="text-sm">
-                    Create or join a channel from the sidebar.
-                  </p>
-                </div>
-              )}
-            </div>
-            {/* Message Input */}
-            <div className="p-3 pb-4 absolute bottom-0 left-0 right-0 z-10 bg-transparent">
-              <MessageInput />
+
+              {currentChatID && <MessagesArea chatID={currentChatID} />}
+
+            <div className="p-3 pb-4 mt-auto absolute bottom-0 left-0 right-0 z-10 bg-transparent">
+              {currentChatID && <MessageInput chatID={currentChatID} />}
             </div>
           </div>
         </ResizablePanel>
-
-        <UsersPanel
-          isUsersCollapsed={isUsersCollapsed}
-          setIsUsersCollapsed={setIsUsersCollapsed}
-          account={account}
-        />
       </ResizablePanelGroup>
     </>
   );
 }
-
-export default function Chat({ account }: { account: Account | null }) {
-  return (
-    <ChatAppProvider account={account}>
-      <ChatContent />
-    </ChatAppProvider>
-  );
-} 

@@ -4,18 +4,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Smile } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
-import { db } from "@/lib/db/instant";
-import { useChatApp } from "@/components/chat-app-context";
 import { id } from "@instantdb/react";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
-import { ScrollArea } from "../ui/scroll-area";
+import { Message } from "@/lib/db/schema";
+import { createImage, useCoState } from "jazz-react";
+import { Chat } from "@/lib/db/schema";
+import { Account, ID } from "jazz-tools";
 
-export function MessageInput() {
-  const { selectedChannel, account } = useChatApp();
+export function MessageInput(props: { chatID: ID<Chat> }) {
+  const chat = useCoState(Chat, props.chatID, { resolve: { $each: true } });
   const [messageInput, setMessageInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
+
 
   const handleEmojiSelect = (emoji: string) => {
     setMessageInput((prev) => prev + emoji);
@@ -24,20 +26,29 @@ export function MessageInput() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || !selectedChannel || !account) return;
-    await db.transact(
-      db.tx.messages[id()].update({
-        channelId: selectedChannel.id,
-        text: messageInput.trim(),
-        sender: account.username?.localName || account.address,
-        senderId: account.address,
-        createdAt: Date.now(),
-      })
-    );
+    if (!chat) return;
+
+    chat.push(Message.create({ text: messageInput }, { owner: chat._owner }));
+
     setMessageInput("");
   };
 
-  // Close emoji picker when clicking outside
+  const sendImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+
+    if (!file || !chat) return;
+
+    if (file.size > 5000000) {
+      alert("Please upload an image less than 5MB.");
+      return;
+    }
+
+    createImage(file, { owner: chat._owner }).then((image) => {
+      chat.push(Message.create({ text: file.name, image: image }, chat._owner));
+    });
+  };
+
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -56,18 +67,26 @@ export function MessageInput() {
     };
   }, []);
 
+  if (!chat) {
+    return (
+      <div className="flex-1 flex justify-center items-center">Loading...</div>
+    );
+  }
+
+
   return (
     <form onSubmit={handleSendMessage} className="flex w-full items-center">
       <div className="relative w-full gap-2 shadow-lg rounded-2xl bg-background/80 backdrop-blur-lg border border-primary/10 p-1.5 flex items-center">
         <div className="flex-1 relative">
+          {/* <ImageInput onImageChange={sendImage} /> */}
           <Input
             type="text"
-            placeholder={selectedChannel ? "Type your message..." : "Select a channel to chat"}
+            placeholder="Type your message..."
             className="flex-1 border-0 rounded-lg drop-shadow-none backdrop-blur-sm shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pr-8"
-            disabled={!selectedChannel}
             autoComplete="off"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
+
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 handleSendMessage(e as any);
@@ -80,7 +99,6 @@ export function MessageInput() {
             size="icon"
             ref={emojiButtonRef}
             className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full p-0 hover:bg-accent"
-            disabled={!selectedChannel}
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
           >
             <Smile className="h-4 w-4" />
@@ -115,7 +133,7 @@ export function MessageInput() {
         </div>
         <Button
           type="submit"
-          disabled={!selectedChannel || !messageInput.trim()}
+          disabled={!messageInput.trim()}
           title="Send Message"
           className="rounded-xl aspect-square p-2 h-9 w-9"
           variant="default"

@@ -15,9 +15,6 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/db/instant";
-import { id } from "@instantdb/react";
-import { lookup } from "@instantdb/react";
 
 interface AccountSelectorProps {
   open: boolean;
@@ -66,42 +63,6 @@ export function AccountSelector({
           return await walletClient.signMessage({ message });
         },
       });
-
-      if (updateDatabase) {
-        try {
-          const selectedAccount = availableAccounts?.items.find(acc =>
-            acc.account.address === account.address
-          )?.account;
-
-          if (selectedAccount) {
-            const username = selectedAccount.username?.localName || "";
-            try {
-              await db.transact(
-                db.tx.users[lookup('address', account.address)].update({
-                  address: account.address,
-                  owner: walletClient.account.address,
-                  username,
-                })
-              );
-            } catch (err) {
-              // If lookup upsert fails (e.g. first login), fallback to insert with new id
-              try {
-                await db.transact(
-                  db.tx.users[id()].update({
-                    address: account.address,
-                    owner: walletClient.account.address,
-                    username,
-                  })
-                );
-              } catch (err2) {
-                console.error("Failed to insert user in DB:", err2);
-              }
-            }
-          }
-        } catch (err) {
-          console.error("Failed to upsert user in DB:", err);
-        }
-      }
 
       onOpenChange(false);
 
