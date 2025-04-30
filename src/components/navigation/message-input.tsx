@@ -4,14 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Smile } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
-import { db } from "@/lib/db/instant";
-import { useChatApp } from "@/components/chat-app-context";
 import { id } from "@instantdb/react";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
-import { ScrollArea } from "../ui/scroll-area";
 
 export function MessageInput() {
-  const { selectedChannel, account } = useChatApp();
   const [messageInput, setMessageInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -24,20 +20,11 @@ export function MessageInput() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageInput.trim() || !selectedChannel || !account) return;
-    await db.transact(
-      db.tx.messages[id()].update({
-        channelId: selectedChannel.id,
-        text: messageInput.trim(),
-        sender: account.username?.localName || account.address,
-        senderId: account.address,
-        createdAt: Date.now(),
-      })
-    );
+    /// TODO: Send message in db
+
     setMessageInput("");
   };
 
-  // Close emoji picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -62,9 +49,8 @@ export function MessageInput() {
         <div className="flex-1 relative">
           <Input
             type="text"
-            placeholder={selectedChannel ? "Type your message..." : "Select a channel to chat"}
+            placeholder="Type your message..."
             className="flex-1 border-0 rounded-lg drop-shadow-none backdrop-blur-sm shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pr-8"
-            disabled={!selectedChannel}
             autoComplete="off"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
@@ -80,7 +66,6 @@ export function MessageInput() {
             size="icon"
             ref={emojiButtonRef}
             className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full p-0 hover:bg-accent"
-            disabled={!selectedChannel}
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
           >
             <Smile className="h-4 w-4" />
@@ -115,7 +100,7 @@ export function MessageInput() {
         </div>
         <Button
           type="submit"
-          disabled={!selectedChannel || !messageInput.trim()}
+          disabled={!messageInput.trim()}
           title="Send Message"
           className="rounded-xl aspect-square p-2 h-9 w-9"
           variant="default"

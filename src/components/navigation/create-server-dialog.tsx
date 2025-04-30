@@ -15,9 +15,7 @@ import { Button } from "@/components/ui/button";
 import { fetchAdminsFor, fetchApp } from "@lens-protocol/client/actions";
 import { getLensClient } from "@/lib/lens/client";
 import { App, evmAddress } from "@lens-protocol/client";
-import { db } from "@/lib/db/instant";
 import { id } from "@instantdb/react";
-import { useChatApp } from "@/components/chat-app-context";
 
 interface CreateServerDialogProps {
   open: boolean;
@@ -29,7 +27,6 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
   const [appData, setAppData] = useState<App | null>(null);
   const [fetchingApp, setFetchingApp] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const { account } = useChatApp();
 
   const isValidEVMAddress = (address: string) => {
     return /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -69,15 +66,7 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
 
   const handleCreate = async () => {
     if (appData) {
-      await db.transact(
-        db.tx.servers[id()].update({
-          address: appAddress,
-          name: appData.metadata?.name || appAddress,
-          icon: appData.metadata?.logo || "",
-          createdAt: Date.now(),
-          owner: appData.owner || account?.address || "",
-        })
-      );
+      /// TODO: Create server in db
       setAppAddress("");
       setAppData(null);
       setFetchError(null);
