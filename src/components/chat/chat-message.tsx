@@ -42,7 +42,6 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
 
   const { name: senderName, picture: senderPicture } = sender;
   const { text: messageText, image: messageImage } = props.msg;
-  console.log(messageText);
 
   return (
     <div className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`} role="row">

@@ -4,7 +4,7 @@ import React from "react";
 
 export function ChatHeader() {
   const selectedChannel = {
-    name: "Global"
+    name: "global"
   }
 
   return (
