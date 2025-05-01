@@ -75,7 +75,7 @@ export function Login() {
     setIsPasskeyAddedState(auth.state === "signedIn");
 
     if (auth.state === "signedIn") {
-      router.push("/chat/co_z2KKm6Ai89zzydrsBJpetMi4qrs");
+      router.push("/chat/co_zWmZGwgXJhfW3AcunTr5hdC8t2p");
     }
   }, [auth.state, router]);
 
