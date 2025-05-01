@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Smile } from "lucide-react";
+import { ImageIcon, Send, Smile } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { id } from "@instantdb/react";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
@@ -145,3 +145,37 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
     </form>
   );
 } 
+
+export function ImageInput({
+  onImageChange,
+}: { onImageChange?: (event: React.ChangeEvent<HTMLInputElement>) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const onUploadClick = () => {
+    inputRef.current?.click();
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Send image"
+        title="Send image"
+        onClick={onUploadClick}
+        className="text-stone-500 p-1.5 rounded-full hover:bg-stone-100 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-stone-200 transition-colors"
+      >
+        <ImageIcon size={24} strokeWidth={1.5} />
+      </button>
+
+      <label className="sr-only">
+        Image
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/png, image/jpeg, image/gif"
+          onChange={onImageChange}
+        />
+      </label>
+    </>
+  );
+}

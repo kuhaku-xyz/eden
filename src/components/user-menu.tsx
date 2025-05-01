@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,14 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
-import { DialogTrigger } from "../ui/dialog";
+} from "./ui/dropdown-menu";
+import { Button } from "./ui/button";
+import { DialogTrigger } from "./ui/dialog";
 import { useLogout } from "@lens-protocol/react";
 import { useRouter } from "next/navigation";
 import type { Account } from "@lens-protocol/client";
-import { ThemeToggle } from "../theme-toggle";
-import { AccountSelector } from "../account-selector";
+import { ThemeToggle } from "./theme-toggle";
+import { AccountSelector } from "./account-selector";
 
 interface UserMenuProps {
   account: Account | null;

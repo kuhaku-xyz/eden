@@ -6,11 +6,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ChatHeader } from "@/components/navigation/chat-header";
-import { MessageInput } from "@/components/navigation/message-input";
-import { CreateServerDialog } from "./navigation/create-server-dialog";
+import { ChatHeader } from "@/components/chat/chat-header";
+import { MessageInput } from "@/components/chat/message-input";
+import { CreateServerDialog } from "./create-server-dialog";
 import { useAccount } from "jazz-react";
-import { MessagesArea } from "./navigation/message-area";
+import { MessagesArea } from "./chat/message-area";
 import { Chat } from "@/lib/db/schema";
 import { Group, ID } from "jazz-tools";
 import { useRouter, useParams } from "next/navigation";
