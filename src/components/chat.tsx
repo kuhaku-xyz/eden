@@ -9,11 +9,11 @@ import {
 import { ChatHeader } from "@/components/chat/chat-header";
 import { MessageInput } from "@/components/chat/message-input";
 import { CreateServerDialog } from "./create-server-dialog";
-import { useAccount } from "jazz-react";
+import { useAccount, useIsAuthenticated } from "jazz-react";
 import { MessagesArea } from "./chat/message-area";
 import { Chat } from "@/lib/db/schema";
 import { ID } from "jazz-tools";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatViewProps {
@@ -22,7 +22,12 @@ interface ChatViewProps {
 
 export default function ChatView({ chatID }: ChatViewProps) {
   const params = useParams();
+  const isAuthenticated = useIsAuthenticated();
   const currentChatID = chatID || (params?.id as ID<Chat>);
+
+  if (!isAuthenticated) {
+    redirect("/");
+  }
 
   return (
     <>

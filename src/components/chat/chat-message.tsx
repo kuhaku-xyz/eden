@@ -40,7 +40,7 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
 
   return (
     <div className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`} role="row">
-      <div className={`flex gap-2 w-full flex-row ${fromMe ? "flex-row-reverse items-end" : "flex-row-reverse items-start"} `}>
+      <div className={`flex gap-2 w-full flex-row ${fromMe ? "flex-row-reverse items-end" : "flex-row items-start"} `}>
         <SenderAvatar picture={senderPicture} name={senderName} fromMe={fromMe} />
 
         <div
