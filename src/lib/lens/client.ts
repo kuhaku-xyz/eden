@@ -6,7 +6,7 @@ const isServer = typeof window === "undefined";
 
 const publicClient = PublicClient.create({
   environment: env.NEXT_PUBLIC_ENVIRONMENT === "development" ? testnet : mainnet,
-  origin: "https://eden.kuhaku.xyz",
+  origin: "https://lens.box",
   storage: isServer ? cookieStorage : clientCookieStorage,
   // apiKey: isServer
   //   ? env.NEXT_PUBLIC_ENVIRONMENT === "development"

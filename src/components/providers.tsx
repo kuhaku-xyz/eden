@@ -19,10 +19,10 @@ const wagmiConfig = createConfig(
       [chains.mainnet.id]: http(),
       [chains.testnet.id]: http(),
     },
-    appName: "Eden",
-    appDescription: "Simply chat.",
-    appUrl: "https://eden.kuhaku.xyz",
-    appIcon: "https://pingpad.io/logo.png",
+    appName: "Box",
+    appDescription: "Chat in a box.",
+    appUrl: "https://lens.box",
+    appIcon: "https://lens.box/favicon.ico",
   }),
 );
 

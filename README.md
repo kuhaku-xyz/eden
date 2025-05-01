@@ -1,4 +1,4 @@
-# Eden 
+# Box 
 
 A real-time chat application built with Next.js, Lens and Jazz 
 
