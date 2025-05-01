@@ -93,7 +93,13 @@ export function Login() {
   };
 
   const handlePasskeyLogin = async () => {
-    await auth.logIn();
+    try {
+      await auth.logIn();
+    } catch (error) {
+      setMode("initial");
+      console.error("Passkey login failed:", error);
+    }
+
   };
 
   return (

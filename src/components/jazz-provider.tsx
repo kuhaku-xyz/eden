@@ -1,6 +1,6 @@
 "use client"
 
-import { User } from "@/lib/db/schema";
+import { BoxAccount } from "@/lib/db/schema";
 import { useAccount, useAuthenticatedUser } from "@lens-protocol/react";
 import { JazzProvider as JazzReactProvider } from "jazz-react";
 import { useAccount as useJazzAccount } from "jazz-react";
@@ -15,7 +15,7 @@ export function JazzProvider(props: { children: React.ReactNode }) {
   return (
     <JazzReactProvider
       sync={{ peer: `wss://cloud.jazz.tools/?key=${JAZZ_PEER_KEY}`, when: "signedUp" }}
-      AccountSchema={User}
+      AccountSchema={BoxAccount}
       defaultProfileName={getRandomUsername()}
     >
       {props.children}
