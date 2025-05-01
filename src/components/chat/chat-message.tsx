@@ -2,6 +2,11 @@ import { Account, ImageDefinition } from "jazz-tools";
 import { Message } from "@/lib/db/schema";
 import { ProgressiveImg } from "jazz-react";
 import clsx from "clsx";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+import rehypeHighlight from "rehype-highlight";
+import { Components } from "react-markdown";
 
 interface SenderAvatarProps {
   picture?: string;
@@ -38,6 +43,22 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
   const { name: senderName, picture: senderPicture } = sender;
   const { text: messageText, image: messageImage } = props.msg;
 
+  // Custom components for ReactMarkdown for chat messages
+  const markdownComponents: Components = {
+    p: ({ children }) => <span className="inline-block my-1">{children}</span>,
+    h1: ({ children }) => <span className="inline-block font-bold text-lg my-1">{children}</span>,
+    h2: ({ children }) => <span className="inline-block font-bold text-md my-1">{children}</span>,
+    h3: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
+    h4: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
+    h5: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
+    h6: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
+    ul: ({ children }) => <div className="my-1">{children}</div>,
+    ol: ({ children }) => <div className="my-1">{children}</div>,
+    li: ({ children }) => <div className="ml-4 flex"><span className="mr-2">•</span>{children}</div>,
+    blockquote: ({ children }) => <div className="pl-2 border-l-2 border-muted-foreground italic my-1">{children}</div>,
+    hr: () => <div className="w-full border-t border-muted my-2"></div>,
+  };
+
   return (
     <div className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`} role="row">
       <div className={`flex gap-2 w-full flex-row ${fromMe ? "flex-row-reverse items-end" : "flex-row items-start"} `}>
@@ -62,9 +83,15 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
               )}
             </ProgressiveImg>
           )}
-          <p className="px-2 leading-relaxed">
-            {messageText}
-          </p>
+          <div className="px-2 leading-relaxed prose dark:prose-invert prose-sm max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+              components={markdownComponents}
+            >
+              {messageText}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
 

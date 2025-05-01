@@ -10,27 +10,216 @@ import { Message } from "@/lib/db/schema";
 import { createImage, useCoState } from "jazz-react";
 import { Chat } from "@/lib/db/schema";
 import { Account, ID } from "jazz-tools";
+import { defaultValueCtx, Editor, editorViewCtx, rootCtx } from "@milkdown/kit/core";
+import { commonmark } from "@milkdown/kit/preset/commonmark";
+import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
+import { nord } from "@milkdown/theme-nord";
+import "@milkdown/theme-nord/style.css";
+
+// Add global styles for Milkdown
+const MilkdownStyles = () => (
+  <style jsx global>{`
+    .milkdown-editor-wrapper .milkdown {
+      border: none;
+      background: transparent;
+      min-height: 2.5rem;
+      padding: 0;
+      font-family: inherit;
+    }
+    .milkdown-editor-wrapper .milkdown .editor {
+      padding: 0;
+      min-height: 2.5rem;
+    }
+    .milkdown-editor-wrapper .milkdown .ProseMirror {
+      min-height: 2.5rem;
+      padding: 0;
+    }
+    .milkdown-editor-wrapper .milkdown .ProseMirror:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    /* Remove margins on heading elements */
+    .milkdown-editor-wrapper .milkdown h1,
+    .milkdown-editor-wrapper .milkdown h2,
+    .milkdown-editor-wrapper .milkdown h3,
+    .milkdown-editor-wrapper .milkdown h4,
+    .milkdown-editor-wrapper .milkdown h5,
+    .milkdown-editor-wrapper .milkdown h6 {
+      margin: 0;
+    }
+    /* Remove additional padding on elements */
+    .milkdown-editor-wrapper .milkdown p,
+    .milkdown-editor-wrapper .milkdown ul,
+    .milkdown-editor-wrapper .milkdown ol,
+    .milkdown-editor-wrapper .milkdown blockquote {
+      margin: 0;
+      padding: 0;
+    }
+  `}</style>
+);
+
+type EditorRef = {
+  getValue: () => string;
+  setValue: (value: string) => void;
+  focus: () => void;
+};
+
+const MilkdownEditor = React.forwardRef<
+  EditorRef,
+  {
+    defaultValue?: string;
+    onFocus?: () => void;
+    onKeyDown?: (e: React.KeyboardEvent) => void;
+    onChange?: (content: string) => void;
+  }
+>((props, ref) => {
+  const [content, setContent] = useState(props.defaultValue || "");
+
+  const { loading, get } = useEditor((root) => {
+    return Editor.make()
+      .config((ctx) => {
+        ctx.set(rootCtx, root);
+        ctx.set(defaultValueCtx, props.defaultValue || "");
+      })
+      .config(nord)
+      .use(commonmark);
+  });
+
+  // Setup a listener for content changes when the editor is ready
+  useEffect(() => {
+    const editor = get();
+    if (editor) {
+      // Use a MutationObserver to detect content changes in the DOM
+      const editorRoot = editor.ctx.get(rootCtx);
+      if (editorRoot && editorRoot instanceof HTMLElement) {
+        const observer = new MutationObserver(() => {
+          try {
+            // Get content from the DOM
+            const editorContent = editorRoot.querySelector('.ProseMirror')?.textContent || '';
+            setContent(editorContent);
+            if (props.onChange) {
+              props.onChange(editorContent);
+            }
+          } catch (error) {
+            console.error("Error getting editor content:", error);
+          }
+        });
+
+        observer.observe(editorRoot, {
+          childList: true,
+          subtree: true,
+          characterData: true
+        });
+
+        return () => observer.disconnect();
+      }
+    }
+  }, [get, props.onChange]);
+
+  const handleLocalKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      if (props.onKeyDown) {
+        props.onKeyDown(e);
+      }
+      return;
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+      if (props.onKeyDown) {
+        props.onKeyDown(e);
+      }
+      return;
+    }
+
+    // For all other keys, just let them through
+    // Shift+Enter will add a newline as normal
+  };
+
+  React.useImperativeHandle(ref, () => ({
+    getValue: () => {
+      return content;
+    },
+    setValue: (value: string) => {
+      setContent(value);
+      const editor = get();
+      if (editor) {
+        const editorRoot = editor.ctx.get(rootCtx);
+        if (editorRoot && editorRoot instanceof HTMLElement) {
+          try {
+            // Attempt to update editor content through DOM
+            const prosemirror = editorRoot.querySelector('.ProseMirror');
+            if (prosemirror) {
+              prosemirror.textContent = value;
+              // Trigger onChange
+              if (props.onChange) {
+                props.onChange(value);
+              }
+            }
+          } catch (error) {
+            console.error("Error setting editor content:", error);
+          }
+        }
+      }
+    },
+    focus: () => {
+      const view = get()?.ctx.get(editorViewCtx);
+      if (view) {
+        view.focus();
+      }
+    }
+  }));
+
+  return (
+    <div
+      className="w-full min-h-[2.5rem] px-1 py-1 rounded-lg milkdown-editor-wrapper"
+      onClick={props.onFocus}
+      onKeyDown={handleLocalKeyDown}
+    >
+      <Milkdown />
+    </div>
+  );
+});
+
+MilkdownEditor.displayName = "MilkdownEditor";
 
 export function MessageInput(props: { chatID: ID<Chat> }) {
   const chat = useCoState(Chat, props.chatID, { resolve: { $each: true } });
   const [messageInput, setMessageInput] = useState("");
+  const [editorContent, setEditorContent] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
-
+  const editorRef = useRef<EditorRef>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEmojiSelect = (emoji: string) => {
-    setMessageInput((prev) => prev + emoji);
+    // Add emoji to the editor content
+    if (editorRef.current) {
+      const currentContent = editorRef.current.getValue();
+      const newContent = currentContent + emoji;
+      editorRef.current.setValue(newContent);
+      setEditorContent(newContent); // Update the state too
+    }
     setShowEmojiPicker(false);
+    focusInput();
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chat) return;
 
-    chat.push(Message.create({ text: messageInput }, { owner: chat._owner }));
+    const messageText = editorContent.trim() || messageInput.trim();
+    if (!messageText) return;
+
+    chat.push(Message.create({ text: messageText }, { owner: chat._owner }));
 
     setMessageInput("");
+    setEditorContent("");
+    editorRef.current?.setValue("");
+    setTimeout(() => {
+      editorRef.current?.focus();
+    }, 0);
   };
 
   const sendImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +237,18 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
     });
   };
 
+  const focusInput = () => {
+    editorRef.current?.focus();
+    setIsFocused(true);
+  };
+
+  // Auto-focus the input on component mount
+  useEffect(() => {
+    setTimeout(() => {
+      editorRef.current?.focus();
+    }, 100);
+    setIsFocused(true);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,84 +268,118 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
     };
   }, []);
 
+  const handleEditorChange = (content: string) => {
+    setEditorContent(content);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleSendMessage(e as any);
+    } else if (e.key === "Escape") {
+      setShowEmojiPicker(false);
+    }
+  };
+
+  const formKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setShowEmojiPicker(false);
+      e.preventDefault();
+    }
+  };
+
   if (!chat) {
     return (
       <div className="flex-1 flex justify-center items-center">Loading...</div>
     );
   }
 
-
   return (
-    <form onSubmit={handleSendMessage} className="flex w-full items-center">
-      <div className="relative w-full gap-2 shadow-lg rounded-2xl bg-background/80 backdrop-blur-lg border border-primary/10 p-1.5 flex items-center">
-        <div className="flex-1 relative">
-          {/* <ImageInput onImageChange={sendImage} /> */}
-          <Input
-            type="text"
-            placeholder="Type your message..."
-            className="flex-1 border-0 rounded-lg drop-shadow-none backdrop-blur-sm shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-3 pr-8"
-            autoComplete="off"
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
+    <div className="flex flex-col w-full">
+      <MilkdownStyles />
 
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                handleSendMessage(e as any);
-              }
-            }}
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            ref={emojiButtonRef}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full p-0 hover:bg-accent"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          >
-            <Smile className="h-4 w-4" />
-            <span className="sr-only">Insert emoji</span>
-          </Button>
+      <form onSubmit={handleSendMessage} className="flex w-full items-center">
+        <div
+          className="relative w-full gap-2 shadow-lg rounded-2xl bg-background/80 backdrop-blur-lg flex flex-row"
+          onKeyDown={formKeyDown}
+        >
+          <div className="flex-1 relative">
+            <div className="relative w-full rounded-lg overflow-hidden ring-offset-background focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2 pr-16">
+              <MilkdownProvider>
+                <MilkdownEditor
+                  ref={editorRef}
+                  defaultValue={messageInput}
+                  onFocus={focusInput}
+                  onKeyDown={handleKeyDown}
+                  onChange={handleEditorChange}
+                />
+              </MilkdownProvider>
 
-          {showEmojiPicker && (
-            <div
-              ref={emojiPickerRef}
-              className="absolute right-8 bottom-full mb-2 z-52 bg-popover border rounded-md shadow-md"
-            >
-              <div className="w-80">
-                <EmojiPicker
-                  className="border border-border rounded-lg"
-                  emojisPerRow={12}
-                  emojiSize={28}
-                  onEmojiSelect={handleEmojiSelect}
+              {/* Button container for both buttons */}
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {/* Emoji button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  ref={emojiButtonRef}
+                  className="h-8 w-8 rounded-full p-0 hover:bg-accent"
+                  onClick={() => {
+                    setShowEmojiPicker(!showEmojiPicker);
+                    if (!showEmojiPicker) {
+                      focusInput();
+                    }
+                  }}
                 >
-                  <EmojiPicker.Header className="p-2 pb-0">
-                    <EmojiPicker.Input
-                      autoFocus={true}
-                      className="focus:ring-0 ring-0 ring-transparent"
-                    />
-                  </EmojiPicker.Header>
-                  <EmojiPicker.Group>
-                    <EmojiPicker.List hideStickyHeader={true} containerHeight={400} />
-                  </EmojiPicker.Group>
-                </EmojiPicker>
+                  <Smile className="h-4 w-4" />
+                  <span className="sr-only">Insert emoji</span>
+                </Button>
+
+                {/* Send button */}
+                <Button
+                  type="submit"
+                  disabled={!editorContent.trim() && !messageInput.trim()}
+                  title="Send Message"
+                  className="h-9 w-9 rounded-lg p-0 aspect-square"
+                  variant="default"
+                >
+                  <Send className="h-4 w-4" />
+                  <span className="sr-only">Send Message</span>
+                </Button>
               </div>
             </div>
-          )}
+
+            {showEmojiPicker && (
+              <div
+                ref={emojiPickerRef}
+                className="absolute right-10 bottom-full mb-2 z-52 bg-popover rounded-md shadow-md"
+              >
+                <div className="w-80">
+                  <EmojiPicker
+                    className="border border-border rounded-lg"
+                    emojisPerRow={12}
+                    emojiSize={28}
+                    onEmojiSelect={handleEmojiSelect}
+                  >
+                    <EmojiPicker.Header className="p-2 pb-0">
+                      <EmojiPicker.Input
+                        autoFocus={true}
+                        className="focus:ring-0 ring-0 ring-transparent"
+                      />
+                    </EmojiPicker.Header>
+                    <EmojiPicker.Group>
+                      <EmojiPicker.List hideStickyHeader={true} containerHeight={400} />
+                    </EmojiPicker.Group>
+                  </EmojiPicker>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <Button
-          type="submit"
-          disabled={!messageInput.trim()}
-          title="Send Message"
-          className="rounded-xl aspect-square p-2 h-9 w-9"
-          variant="default"
-        >
-          <Send className="h-4 w-4" />
-          <span className="sr-only">Send Message</span>
-        </Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
-} 
+}
 
 export function ImageInput({
   onImageChange,
