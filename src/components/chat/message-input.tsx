@@ -56,6 +56,38 @@ const MilkdownStyles = () => (
       margin: 0;
       padding: 0;
     }
+    /* Hide scrollbar for emoji picker */
+    .emoji-picker-list {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    .emoji-picker-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
+    /* Target emoji picker scrollbar */
+    .emoji-picker-react .emoji-scroll-wrapper {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    .emoji-picker-react .emoji-scroll-wrapper::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
+    /* Target any scrollable content in the emoji picker */
+    [role="dialog"] div[style*="overflow"] {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    [role="dialog"] div[style*="overflow"]::-webkit-scrollbar {
+      display: none !important;
+    }
+    /* Target the emoji picker container */
+    .emoji-picker-container * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    .emoji-picker-container *::-webkit-scrollbar {
+      display: none !important;
+    }
   `}</style>
 );
 
@@ -201,7 +233,7 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
     }
 
     createImage(file, { owner: chat._owner }).then((image) => {
-      chat.push(Message.create({ text: file.name, image: image }, chat._owner));
+      chat.push(Message.create({ text: "", image: image }, chat._owner));
     });
   };
 
@@ -272,7 +304,7 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
           onKeyDown={formKeyDown}
         >
           <div className="flex-1 relative">
-            <div className="relative w-full rounded-lg overflow-hidden ring-offset-background border border-border focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2 pr-16">
+            <div className="relative w-full rounded-lg overflow-hidden ring-offset-background border border-border focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2 pr-24">
               <MilkdownProvider>
                 <MilkdownEditor
                   ref={editorRef}
@@ -285,6 +317,11 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
 
               {/* Button container for both buttons */}
               <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {/* Image upload button */}
+                <ImageInput
+                  onImageChange={sendImage}
+                />
+
                 {/* Emoji button */}
                 <Button
                   type="button"
@@ -320,9 +357,9 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
             {showEmojiPicker && (
               <div
                 ref={emojiPickerRef}
-                className="absolute right-10 bottom-full mb-2 z-52 bg-popover rounded-md shadow-md"
+                className="absolute right-28 bottom-full mb-2 z-52 bg-popover rounded-md shadow-md"
               >
-                <div className="w-80">
+                <div className="w-80 emoji-picker-container">
                   <EmojiPicker
                     className="border border-border rounded-lg"
                     emojisPerRow={12}
@@ -360,25 +397,24 @@ export function ImageInput({
 
   return (
     <>
-      <button
+      <Button
         type="button"
-        aria-label="Send image"
-        title="Send image"
+        variant="ghost"
+        size="icon"
         onClick={onUploadClick}
-        className="text-stone-500 p-1.5 rounded-full hover:bg-stone-100 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-stone-200 transition-colors"
+        className="h-8 w-8 rounded-full p-0 hover:bg-accent"
       >
-        <ImageIcon size={24} strokeWidth={1.5} />
-      </button>
+        <ImageIcon className="h-4 w-4" />
+        <span className="sr-only">Upload image</span>
+      </Button>
 
-      <label className="sr-only">
-        Image
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/png, image/jpeg, image/gif"
-          onChange={onImageChange}
-        />
-      </label>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png, image/jpeg, image/gif"
+        onChange={onImageChange}
+        className="hidden"
+      />
     </>
   );
 }

@@ -62,13 +62,15 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
             <ProgressiveImg image={messageImage}>
               {({ src }) => (
                 <img
-                  className="h-auto max-h-[20rem] max-w-full rounded-t-xl mb-1"
+                  className="h-auto max-h-[20rem] max-w-full rounded-xl mb-0"
                   src={src}
                 />
               )}
             </ProgressiveImg>
           )}
-          <div className={`px-2 leading-relaxed prose-sm max-w-none ${fromMe ? "prose-invert dark:prose" : "prose  dark:prose-invert"} prose-blockquote:my-1 prose-blockquote:h-fit prose-blockquote:border-l-2`}>
+          <div className={`px-2 leading-relaxed prose-sm max-w-none ${fromMe ? "prose-invert dark:prose" : "prose  dark:prose-invert"} 
+            prose-blockquote:my-1 prose-blockquote:h-fit prose-blockquote:border-l-2 
+            `}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeSanitize, rehypeHighlight]}
