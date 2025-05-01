@@ -15,8 +15,9 @@ import { commonmark } from "@milkdown/kit/preset/commonmark";
 import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
 import { nord } from "@milkdown/theme-nord";
 import "@milkdown/theme-nord/style.css";
+import { getMarkdown, replaceAll } from "@milkdown/utils";
+import { listener, listenerCtx } from "@milkdown/kit/plugin/listener";
 
-// Add global styles for Milkdown
 const MilkdownStyles = () => (
   <style jsx global>{`
     .milkdown-editor-wrapper .milkdown {
@@ -59,8 +60,8 @@ const MilkdownStyles = () => (
 );
 
 type EditorRef = {
-  getValue: () => string;
-  setValue: (value: string) => void;
+  getMarkdown: () => string;
+  setMarkdown: (value: string) => void;
   focus: () => void;
 };
 
@@ -70,51 +71,26 @@ const MilkdownEditor = React.forwardRef<
     defaultValue?: string;
     onFocus?: () => void;
     onKeyDown?: (e: React.KeyboardEvent) => void;
-    onChange?: (content: string) => void;
+    onChange?: (markdown: string) => void;
   }
 >((props, ref) => {
-  const [content, setContent] = useState(props.defaultValue || "");
-
-  const { loading, get } = useEditor((root) => {
+  const editorInfo = useEditor((root) => {
     return Editor.make()
       .config((ctx) => {
         ctx.set(rootCtx, root);
         ctx.set(defaultValueCtx, props.defaultValue || "");
-      })
-      .config(nord)
-      .use(commonmark);
-  });
-
-  // Setup a listener for content changes when the editor is ready
-  useEffect(() => {
-    const editor = get();
-    if (editor) {
-      // Use a MutationObserver to detect content changes in the DOM
-      const editorRoot = editor.ctx.get(rootCtx);
-      if (editorRoot && editorRoot instanceof HTMLElement) {
-        const observer = new MutationObserver(() => {
-          try {
-            // Get content from the DOM
-            const editorContent = editorRoot.querySelector('.ProseMirror')?.textContent || '';
-            setContent(editorContent);
-            if (props.onChange) {
-              props.onChange(editorContent);
-            }
-          } catch (error) {
-            console.error("Error getting editor content:", error);
+        ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
+          if (props.onChange) {
+            props.onChange(markdown);
           }
         });
+      })
+      .config(nord)
+      .use(commonmark)
+      .use(listener);
+  });
 
-        observer.observe(editorRoot, {
-          childList: true,
-          subtree: true,
-          characterData: true
-        });
-
-        return () => observer.disconnect();
-      }
-    }
-  }, [get, props.onChange]);
+  const { get } = editorInfo;
 
   const handleLocalKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -130,34 +106,29 @@ const MilkdownEditor = React.forwardRef<
       }
       return;
     }
-
-    // For all other keys, just let them through
-    // Shift+Enter will add a newline as normal
   };
 
   React.useImperativeHandle(ref, () => ({
-    getValue: () => {
-      return content;
-    },
-    setValue: (value: string) => {
-      setContent(value);
+    getMarkdown: () => {
       const editor = get();
       if (editor) {
-        const editorRoot = editor.ctx.get(rootCtx);
-        if (editorRoot && editorRoot instanceof HTMLElement) {
-          try {
-            // Attempt to update editor content through DOM
-            const prosemirror = editorRoot.querySelector('.ProseMirror');
-            if (prosemirror) {
-              prosemirror.textContent = value;
-              // Trigger onChange
-              if (props.onChange) {
-                props.onChange(value);
-              }
-            }
-          } catch (error) {
-            console.error("Error setting editor content:", error);
-          }
+        try {
+          const markdown = editor.action(getMarkdown());
+          return String(markdown);
+        } catch (error) {
+          console.error("Error getting markdown:", error);
+          return "";
+        }
+      }
+      return "";
+    },
+    setMarkdown: (markdown: string) => {
+      const editor = get();
+      if (editor) {
+        try {
+          editor.action(replaceAll(markdown));
+        } catch (error) {
+          console.error("Error setting markdown:", error);
         }
       }
     },
@@ -185,7 +156,7 @@ MilkdownEditor.displayName = "MilkdownEditor";
 export function MessageInput(props: { chatID: ID<Chat> }) {
   const chat = useCoState(Chat, props.chatID, { resolve: { $each: true } });
   const [messageInput, setMessageInput] = useState("");
-  const [editorContent, setEditorContent] = useState("");
+  const [currentMarkdown, setCurrentMarkdown] = useState(messageInput || "");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -194,12 +165,10 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEmojiSelect = (emoji: string) => {
-    // Add emoji to the editor content
     if (editorRef.current) {
-      const currentContent = editorRef.current.getValue();
-      const newContent = currentContent + emoji;
-      editorRef.current.setValue(newContent);
-      setEditorContent(newContent); // Update the state too
+      const currentMarkdownContent = editorRef.current.getMarkdown();
+      const newMarkdownContent = currentMarkdownContent + emoji;
+      editorRef.current.setMarkdown(newMarkdownContent);
     }
     setShowEmojiPicker(false);
     focusInput();
@@ -207,16 +176,15 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chat) return;
+    if (!chat || !editorRef.current) return;
 
-    const messageText = editorContent.trim() || messageInput.trim();
+    const messageText = editorRef.current.getMarkdown().trim();
     if (!messageText) return;
 
     chat.push(Message.create({ text: messageText }, { owner: chat._owner }));
 
     setMessageInput("");
-    setEditorContent("");
-    editorRef.current?.setValue("");
+    editorRef.current.setMarkdown("");
     setTimeout(() => {
       editorRef.current?.focus();
     }, 0);
@@ -268,8 +236,8 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
     };
   }, []);
 
-  const handleEditorChange = (content: string) => {
-    setEditorContent(content);
+  const handleMarkdownChange = (markdown: string) => {
+    setCurrentMarkdown(markdown);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -304,14 +272,14 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
           onKeyDown={formKeyDown}
         >
           <div className="flex-1 relative">
-            <div className="relative w-full rounded-lg overflow-hidden ring-offset-background focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2 pr-16">
+            <div className="relative w-full rounded-lg overflow-hidden ring-offset-background border border-border focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-2 pr-16">
               <MilkdownProvider>
                 <MilkdownEditor
                   ref={editorRef}
                   defaultValue={messageInput}
                   onFocus={focusInput}
                   onKeyDown={handleKeyDown}
-                  onChange={handleEditorChange}
+                  onChange={handleMarkdownChange}
                 />
               </MilkdownProvider>
 
@@ -338,7 +306,7 @@ export function MessageInput(props: { chatID: ID<Chat> }) {
                 {/* Send button */}
                 <Button
                   type="submit"
-                  disabled={!editorContent.trim() && !messageInput.trim()}
+                  disabled={!currentMarkdown.trim()}
                   title="Send Message"
                   className="h-9 w-9 rounded-lg p-0 aspect-square"
                   variant="default"

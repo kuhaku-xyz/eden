@@ -42,22 +42,7 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
 
   const { name: senderName, picture: senderPicture } = sender;
   const { text: messageText, image: messageImage } = props.msg;
-
-  // Custom components for ReactMarkdown for chat messages
-  const markdownComponents: Components = {
-    p: ({ children }) => <span className="inline-block my-1">{children}</span>,
-    h1: ({ children }) => <span className="inline-block font-bold text-lg my-1">{children}</span>,
-    h2: ({ children }) => <span className="inline-block font-bold text-md my-1">{children}</span>,
-    h3: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
-    h4: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
-    h5: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
-    h6: ({ children }) => <span className="inline-block font-bold my-1">{children}</span>,
-    ul: ({ children }) => <div className="my-1">{children}</div>,
-    ol: ({ children }) => <div className="my-1">{children}</div>,
-    li: ({ children }) => <div className="ml-4 flex"><span className="mr-2">•</span>{children}</div>,
-    blockquote: ({ children }) => <div className="pl-2 border-l-2 border-muted-foreground italic my-1">{children}</div>,
-    hr: () => <div className="w-full border-t border-muted my-2"></div>,
-  };
+  console.log(messageText);
 
   return (
     <div className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`} role="row">
@@ -66,7 +51,7 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
 
         <div
           className={clsx(
-            "line-clamp-10 text-ellipsis whitespace-pre-wrap",
+            "line-clamp-10 text-ellipsis",
             "rounded-2xl overflow-hidden max-w-[calc(100%-5rem)] shadow-sm p-0.5",
             fromMe
               ? "bg-primary/90 text-primary-foreground"
@@ -83,11 +68,11 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
               )}
             </ProgressiveImg>
           )}
-          <div className="px-2 leading-relaxed prose dark:prose-invert prose-sm max-w-none">
+          <div className={`px-2 leading-relaxed prose-sm max-w-none ${fromMe ? "prose-invert dark:prose" : "prose  dark:prose-invert"} prose-blockquote:my-1 prose-blockquote:h-fit prose-blockquote:border-l-2`}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeSanitize, rehypeHighlight]}
-              components={markdownComponents}
+            // components={markdownComponents}
             >
               {messageText}
             </ReactMarkdown>
