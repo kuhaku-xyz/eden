@@ -3,91 +3,92 @@ import { Message } from "@/lib/db/schema";
 import { ProgressiveImg } from "jazz-react";
 import clsx from "clsx";
 
+interface SenderAvatarProps {
+  picture?: string;
+  name?: string;
+  fromMe: boolean;
+}
+
+function SenderAvatar({ picture, name, fromMe }: SenderAvatarProps) {
+  return (
+    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+      {picture ? (
+        <img src={picture} alt="Profile" className="w-full h-full object-cover" />
+      ) : (
+        <div className={`w-full h-full ${fromMe ? "bg-primary" : "bg-secondary"} flex items-center justify-center ${fromMe ? "text-primary-foreground" : "text-secondary-foreground"}`}>
+          {name?.[0]?.toUpperCase() || '?'}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ChatMessage(props: { me: Account; msg: Message }) {
+  const lastEdit = props.msg._edits.text;
+  const fromMe = lastEdit.by?.isMe ?? false;
+  const sender = lastEdit.by?.profile
+
+  if (!sender) {
+    return <UnreadableMessage />;
+  }
   if (!props.me.canRead(props.msg)) {
-    return (
-      <BubbleContainer fromMe={false}>
-        <BubbleBody fromMe={false}>
-          <BubbleText
-            text="Message not readable"
-            className="text-gray-500 italic"
-          />
-        </BubbleBody>
-      </BubbleContainer>
-    );
+    return <UnreadableMessage />;
   }
 
-  const lastEdit = props.msg._edits.text;
-  const fromMe = lastEdit.by?.isMe;
-  const { text, image } = props.msg;
+  const { name: senderName, picture: senderPicture } = sender;
+  const { text: messageText, image: messageImage } = props.msg;
 
   return (
-    <BubbleContainer fromMe={fromMe}>
-      <BubbleBody fromMe={fromMe}>
-        {image && <BubbleImage image={image} />}
-        <BubbleText text={text} />
-      </BubbleBody>
-      <BubbleInfo by={lastEdit.by?.profile?.name} madeAt={lastEdit.madeAt} />
-    </BubbleContainer>
-  );
-}
+    <div className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`} role="row">
+      <div className={`flex gap-2 w-full flex-row ${fromMe ? "flex-row-reverse items-end" : "flex-row-reverse items-start"} `}>
+        <SenderAvatar picture={senderPicture} name={senderName} fromMe={fromMe} />
 
-export function BubbleContainer(props: {
-  children: React.ReactNode;
-  fromMe: boolean | undefined;
-}) {
-  const align = props.fromMe ? "items-end" : "items-start";
-  return (
-    <div className={`${align} flex flex-col m-3`} role="row">
-      {props.children}
+        <div
+          className={clsx(
+            "line-clamp-10 text-ellipsis whitespace-pre-wrap",
+            "rounded-2xl overflow-hidden max-w-[calc(100%-5rem)] shadow-sm p-0.5",
+            fromMe
+              ? "bg-primary/90 text-primary-foreground"
+              : "bg-secondary/80 text-secondary-foreground",
+          )}
+        >
+          {messageImage && (
+            <ProgressiveImg image={messageImage}>
+              {({ src }) => (
+                <img
+                  className="h-auto max-h-[20rem] max-w-full rounded-t-xl mb-1"
+                  src={src}
+                />
+              )}
+            </ProgressiveImg>
+          )}
+          <p className="px-2 leading-relaxed">
+            {messageText}
+          </p>
+        </div>
+      </div>
+
+      <div className="text-xs text-neutral-500 mt-1.5">
+        {senderName} · {lastEdit.madeAt.toLocaleTimeString()}
+      </div>
     </div>
   );
 }
 
-export function BubbleBody(props: {
-  children: React.ReactNode;
-  fromMe: boolean | undefined;
-}) {
+export function UnreadableMessage() {
   return (
-    <div
-      className={clsx(
-        "line-clamp-10 text-ellipsis whitespace-pre-wrap",
-        "rounded-2xl overflow-hidden max-w-[calc(100%-5rem)] shadow-sm p-1",
-        props.fromMe
-          ? "bg-primary/90 text-primary-foreground"
-          : "bg-secondary/80 text-secondary-foreground",
-      )}
-    >
-      {props.children}
-    </div>
-  );
-}
-
-export function BubbleText(props: { text: string; className?: string }) {
-  return (
-    <p className={clsx("px-2 leading-relaxed", props.className)}>
-      {props.text}
-    </p>
-  );
-}
-
-export function BubbleImage(props: { image: ImageDefinition }) {
-  return (
-    <ProgressiveImg image={props.image}>
-      {({ src }) => (
-        <img
-          className="h-auto max-h-[20rem] max-w-full rounded-t-xl mb-1"
-          src={src}
-        />
-      )}
-    </ProgressiveImg>
-  );
-}
-
-export function BubbleInfo(props: { by: string | undefined; madeAt: Date }) {
-  return (
-    <div className="text-xs text-neutral-500 mt-1.5">
-      {props.by} · {props.madeAt.toLocaleTimeString()}
+    <div className={`items-start flex flex-col m-3`} role="row">
+      <div
+        className={clsx(
+          "line-clamp-10 text-ellipsis whitespace-pre-wrap",
+          "rounded-2xl overflow-hidden max-w-[calc(100%-5rem)] shadow-sm p-1",
+          "bg-secondary/80 text-secondary-foreground",
+        )}
+      >
+        <p className="px-2 leading-relaxed text-gray-500 italic">
+          Message not readable
+        </p>
+      </div>
     </div>
   );
 }

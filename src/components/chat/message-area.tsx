@@ -6,6 +6,7 @@ import { Account, ID } from "jazz-tools";
 import { Message } from "@/lib/db/schema";
 import { ScrollArea } from "../ui/scroll-area";
 import { ChatMessage } from "./chat-message";
+import { Button } from "../ui/button";
 
 export function MessagesArea(props: { chatID: ID<Chat> }) {
   const chat = useCoState(Chat, props.chatID, { resolve: { $each: true } });
@@ -30,12 +31,13 @@ export function MessagesArea(props: { chatID: ID<Chat> }) {
       ref={messagesEndRef}
       >
         {chat.length > showNLastMessages && (
-          <button
+          <Button
             className="px-4 py-1 block mx-auto my-2 border rounded"
+            variant="outline"
             onClick={() => setShowNLastMessages(showNLastMessages + 10)}
           >
             Show more
-          </button>
+          </Button>
         )}
         {chat.length > 0 ? (
           chat

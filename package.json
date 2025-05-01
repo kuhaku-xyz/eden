@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "bunx biome format --write ./src/**/*.{ts,tsx}",
+    "check": "bunx biome check --write ./src/**/*.{ts,tsx}"
   },
   "dependencies": {
     "@ferrucc-io/emoji-picker": "^0.0.44",
