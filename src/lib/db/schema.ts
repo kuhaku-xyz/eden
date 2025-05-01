@@ -1,9 +1,55 @@
-import { CoMap, co, CoFeed, Account, CoList, ImageDefinition } from "jazz-tools";
+import { CoMap, co, CoFeed, Account, CoList, ImageDefinition, Profile, Group } from "jazz-tools";
+import { getLensClient } from "../lens/client";
+import { fetchAccount } from "@lens-protocol/client/actions";
 
-export class User extends Account {
+export class BoxProfile extends Profile {
   name = co.string;
-  username = co.string;
+  address = co.string;
   picture = co.optional.string;
+}
+
+/** Per-user private `CoMap` */
+export class AccountRoot extends CoMap {
+}
+
+export class BoxAccount extends Account {
+  profile = co.ref(BoxProfile);
+  root = co.ref(AccountRoot);
+
+  /**
+   *  The account migration is run on account creation and on every log-in.
+   *  You can use it to set up the account root and any other initial CoValues you need.
+   */
+  async migrate() {
+    const username = this.profile?.name;
+    if (!username) {
+      return;
+    }
+
+    const client = await getLensClient();
+    const account = await fetchAccount(client, {
+      username: {
+        localName: username,
+      }
+    }).unwrapOr(null);
+
+    if (!account?.username?.localName) {
+      return;
+    }
+
+    const group = Group.create();
+
+    // The profile is visible to everyone
+    group.addMember("everyone", "reader"); 
+
+    const profile = BoxProfile.create({
+      name: username,
+      address: account.address,
+      picture: account.metadata?.picture,
+    }, group);
+
+    this.profile = profile;
+  }
 }
 
 export class Message extends CoMap {
@@ -11,4 +57,11 @@ export class Message extends CoMap {
   image = co.optional.ref(ImageDefinition);
 }
 
-export class Chat extends CoList.Of(co.ref(Message)) {}
+export class Chat extends CoList.Of(co.ref(Message)) { }
+
+// Register the Account schema so `useAccount` returns our custom `MyAppAccount` 
+declare module "jazz-react" {
+    interface Register {
+        Account: BoxAccount;
+    }
+}

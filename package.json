@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "bunx biome format --write ./src/**/*.{ts,tsx}",
+    "check": "bunx biome check --write ./src/**/*.{ts,tsx}"
   },
   "dependencies": {
     "@ferrucc-io/emoji-picker": "^0.0.44",
@@ -15,6 +17,10 @@
     "@lens-chain/sdk": "^1.0.3",
     "@lens-protocol/client": "canary",
     "@lens-protocol/react": "canary",
+    "@milkdown/crepe": "^7.9.0",
+    "@milkdown/kit": "^7.9.0",
+    "@milkdown/react": "^7.9.0",
+    "@milkdown/theme-nord": "^7.9.0",
     "@radix-ui/react-accordion": "^1.2.7",
     "@radix-ui/react-alert-dialog": "^1.1.10",
     "@radix-ui/react-aspect-ratio": "^1.1.4",
@@ -65,8 +71,12 @@
     "react-day-picker": "8.10.1",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.55.0",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^2.15.3",
+    "rehype-highlight": "^7.0.2",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "sonner": "^2.0.3",
@@ -79,14 +89,15 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^20.17.30",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "@tailwindcss/postcss": "^4.1.4",
-    "tailwindcss": "^4.1.4",
     "eslint": "^9.25.0",
     "eslint-config-next": "15.3.0",
-    "@eslint/eslintrc": "^3.3.1"
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3"
   }
 }

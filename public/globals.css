@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 @source "../node_modules/@ferrucc-io/emoji-picker";
 
 @custom-variant dark (&:is(.dark *));
@@ -44,6 +45,7 @@
   --radius-xl: calc(var(--radius) + 4px);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-blink: blink 1s step-end infinite;
 
   @keyframes accordion-down {
     from {
@@ -62,6 +64,18 @@
 
     to {
       height: 0;
+    }
+  }
+
+  @keyframes blink {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
     }
   }
 }
