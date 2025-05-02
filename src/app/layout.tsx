@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Box",
-  description: "Chat in the box",
+  description: "Chat in a box",
   icons: [{ rel: "icon", url: "/favicon.png" }],
 };
 

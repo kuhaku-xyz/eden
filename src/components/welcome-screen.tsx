@@ -26,45 +26,49 @@ export default function WelcomeScreen() {
       <div className="flex flex-col items-center md:items-start text-center md:text-left w-full md:w-1/2">
         <h2 className="text-5xl font-bold mb-2">Chat-in-a-Box</h2>
         <p className="text-muted-foreground text-sm mb-4 text-center max-w-md mb-12">
-          A simple, secure, and open-source chat app on Lens.
+          Talk to all of your Lens friends in a secure way.
         </p>
         <div className="flex flex-col gap-8 w-full max-w-md">
-          {/* Feature Card 1 */}
-          <div className="border rounded-lg p-4 bg-background">
-            <div className="flex items-center mb-2">
-              <LockKeyhole className="h-5 w-5 text-muted-foreground mr-3" />
-              <h3 className="font-semibold">E2EE</h3>
-            </div>
-            <p className="text-sm text-muted-foreground ">
-              End-to-end encrypted conversations ensure your privacy.
-            </p>
-          </div>
-          {/* Feature Card 2 */}
-          <div className="border rounded-lg p-4 bg-background">
-            <div className="flex items-center mb-2">
-              <Code className="h-5 w-5 text-muted-foreground mr-3" />
-              <h3 className="font-semibold">Open Source</h3>
-            </div>
-            <p className="text-sm text-muted-foreground ">
-              Built with transparency. Audit the code and contribute.
-            </p>
-          </div>
-          {/* Feature Card 3 */}
-          <div className="border rounded-lg p-4 bg-background">
-            <div className="flex items-center mb-2">
-              <Users className="h-5 w-5 text-muted-foreground mr-3" />
-              <h3 className="font-semibold">Community Ran</h3>
-            </div>
-            <p className="text-sm text-muted-foreground ">
-              Built by the community, unaffiliated with Lens Labs.
-            </p>
-          </div>
+          <Login />
         </div>
       </div>
 
       {/* Right Column */}
-      <div className="flex flex-col items-start p-4 max-h-[450px] border rounded-lg w-full max-w-xs mt-12 md:mt-0 md:w-1/2">
-        <Login />
+      <div className="flex flex-col items-start p-4 max-h-[450px] gap-8 rounded-lg w-full max-w-md mt-12 md:mt-0 md:w-1/2">
+
+        {/* Feature Card 1 */}
+        <div className="border rounded-lg p-4 bg-background">
+          <div className="flex items-center mb-2">
+            <LockKeyhole className="h-5 w-5 text-muted-foreground mr-3" />
+            <h3 className="font-semibold">Secure</h3>
+          </div>
+          <p className="text-sm text-muted-foreground ">
+            <b>End-to-end encrypted</b> conversations ensure your privacy.
+            Box uses public-key cryptography to encrypt messages.
+            Your passkey never leave your device.
+          </p>
+        </div>
+        {/* Feature Card 2 */}
+        <div className="border rounded-lg p-4 w-full bg-background">
+          <div className="flex items-center mb-2">
+            <Code className="h-5 w-5 text-muted-foreground mr-3" />
+            <h3 className="font-semibold">Open Source</h3>
+          </div>
+          <p className="text-sm text-muted-foreground ">
+            Built with transparency. <a href="https://github.com/kuhaku-xyz/eden" className="text-primary hover:underline">Audit the code</a> or <a href="https://github.com/kuhaku-xyz/eden" className="text-primary hover:underline">contribute</a>.
+          </p>
+        </div>
+        {/* Feature Card 3 */}
+        <div className="border rounded-lg p-4 bg-background">
+          <div className="flex items-center mb-2">
+            <Users className="h-5 w-5 text-muted-foreground mr-3" />
+            <h3 className="font-semibold">Community Ran</h3>
+          </div>
+          <p className="text-sm text-muted-foreground ">
+            Built by the community, for the community. Unaffiliated with Lens Labs.
+          </p>
+        </div>
+
       </div>
     </div>
   );

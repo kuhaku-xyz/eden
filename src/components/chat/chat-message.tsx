@@ -7,6 +7,10 @@ import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import { Components } from "react-markdown";
+import { useEffect } from "react";
+
+// Notification context to be created
+import { useNotificationContext } from "@/context/notification-context";
 
 interface SenderAvatarProps {
   picture?: string;
@@ -32,6 +36,21 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
   const lastEdit = props.msg._edits.text;
   const fromMe = lastEdit.by?.isMe ?? false;
   const sender = lastEdit.by?.profile
+  const myUsername = props.me.profile?.name;
+
+  // Get notification context
+  const { addMention, markMentionAsSeen } = useNotificationContext();
+
+  // Check for mentions using regex
+  useEffect(() => {
+    if (!fromMe && myUsername && props.msg.text) {
+      const mentionRegex = new RegExp(`@${myUsername}\\b`, 'i');
+      if (mentionRegex.test(props.msg.text)) {
+        // Add message to mentions
+        addMention(props.msg.id);
+      }
+    }
+  }, [props.msg, myUsername, fromMe, addMention]);
 
   if (!sender) {
     return <UnreadableMessage />;
@@ -44,7 +63,19 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
   const { text: messageText, image: messageImage } = props.msg;
 
   return (
-    <div className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`} role="row">
+    <div
+      className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`}
+      role="row"
+      onClick={() => {
+        // Mark mention as seen when clicked
+        if (!fromMe && myUsername && messageText) {
+          const mentionRegex = new RegExp(`@${myUsername}\\b`, 'i');
+          if (mentionRegex.test(messageText)) {
+            markMentionAsSeen(props.msg.id);
+          }
+        }
+      }}
+    >
       <div className={`flex gap-2 w-full flex-row ${fromMe ? "flex-row-reverse items-end" : "flex-row items-start"} `}>
         <SenderAvatar picture={senderPicture} name={senderName} fromMe={fromMe} />
 

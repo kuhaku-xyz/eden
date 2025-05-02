@@ -10,8 +10,8 @@ export default async function Home() {
     address: authenticatedUser.address,
   }).unwrapOr(null) : null;
 
-    return (
-      <WelcomeScreen />
-    );
 
+  return (
+    <WelcomeScreen />
+  );
 }
