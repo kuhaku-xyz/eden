@@ -1,23 +1,7 @@
 "use client";
+
 import { Login } from "@/components/login";
-import { motion } from "motion/react";
-import { Noto_Sans_JP, Yuji_Boku } from "next/font/google";
 import { LockKeyhole, Code, Users } from 'lucide-react';
-
-const notoSansJP = Noto_Sans_JP({
-  variable: "--font-noto-jp",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  preload: false,
-});
-
-// Import Yuji Boku font directly in the component
-const yujiBoku = Yuji_Boku({
-  variable: "--font-yuji-boku",
-  subsets: ["latin"],
-  weight: ["400"],
-  preload: true,
-});
 
 export default function WelcomeScreen() {
   return (
