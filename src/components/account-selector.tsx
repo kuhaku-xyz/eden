@@ -15,6 +15,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
 import { useRouter } from "next/navigation";
+import { resolveImageUrl } from "@/lib/lens/resolve-image-url";
 
 interface AccountSelectorProps {
   open: boolean;
@@ -98,6 +99,7 @@ export function AccountSelector({
             {availableAccounts && availableAccounts.items.length > 0 && (
               availableAccounts.items.map((acc) => {
                 const isCurrentAccount = currentAccount ? acc.account.address === currentAccount.address : false;
+                const avatar = resolveImageUrl(acc.account.metadata?.picture);
 
                 return (
                   <Button
@@ -108,7 +110,7 @@ export function AccountSelector({
                     className="flex flex-col items-center h-auto py-3 px-2"
                   >
                     <Avatar className="w-10 h-10 mb-2">
-                      <AvatarImage src={acc.account.metadata?.picture} />
+                      <AvatarImage src={avatar} />
                       <AvatarFallback>
                         {acc.account.username?.localName?.charAt(0) || acc.account.address.charAt(0)}
                       </AvatarFallback>

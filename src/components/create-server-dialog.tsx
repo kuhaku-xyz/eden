@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchAdminsFor, fetchApp } from "@lens-protocol/client/actions";
-import { getLensClient } from "@/lib/lens/client";
+import { getLensClient } from "@/lib/lens/lens-client";
 import { App, evmAddress } from "@lens-protocol/client";
 import { id } from "@instantdb/react";
 

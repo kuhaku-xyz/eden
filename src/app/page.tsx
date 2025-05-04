@@ -1,5 +1,5 @@
 import WelcomeScreen from "@/components/welcome-screen";
-import { getLensClient } from "@/lib/lens/client";
+import { getLensClient } from "@/lib/lens/lens-client";
 import { fetchAccount } from "@lens-protocol/client/actions";
 import { redirect } from "next/navigation";
 

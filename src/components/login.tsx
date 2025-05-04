@@ -9,13 +9,11 @@ import { ConnectKitButton } from "connectkit";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { AccountSelector } from "./account-selector";
-import { type Account } from "@lens-protocol/client";
 import { CheckCircle, ArrowLeft } from "lucide-react";
 import { usePasskeyAuth } from "jazz-react";
 import { fetchAccount } from "@lens-protocol/client/actions";
-import { getLensClient } from "@/lib/lens/client";
+import { getLensClient } from "@/lib/lens/lens-client";
 
 // Helper component for step indicator
 const StepIndicator = ({ stepNumber, label, completed }: { stepNumber: number, label: string, completed: boolean }) => (

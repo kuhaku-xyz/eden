@@ -16,6 +16,7 @@ import { ID } from "jazz-tools";
 import { redirect, useParams } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { resolveImageUrl } from "@/lib/lens/resolve-image-url";
 
 interface ChatViewProps {
   chatID?: ID<Chat>;
@@ -26,7 +27,7 @@ export default function ChatView({ chatID }: ChatViewProps) {
   const isAuthenticated = useIsAuthenticated();
   const { me } = useAccount()
   const currentChatID = chatID || (params?.id as ID<Chat>);
-  const avatar = me?.profile?.picture;
+  const avatar = resolveImageUrl(me?.profile?.picture);
 
   if (!isAuthenticated) {
     redirect("/");

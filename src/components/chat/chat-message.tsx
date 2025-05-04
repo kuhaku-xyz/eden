@@ -7,10 +7,8 @@ import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import { Components } from "react-markdown";
-import { useEffect } from "react";
-
-// Notification context to be created
-import { useNotificationContext } from "@/context/notification-context";
+import { useEffect, useRef, useState } from "react";
+import { resolveImageUrl } from "@/lib/lens/resolve-image-url";
 
 interface SenderAvatarProps {
   picture?: string;
@@ -37,20 +35,8 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
   const fromMe = lastEdit.by?.isMe ?? false;
   const sender = lastEdit.by?.profile
   const myUsername = props.me.profile?.name;
-
-  // Get notification context
-  const { addMention, markMentionAsSeen } = useNotificationContext();
-
-  // Check for mentions using regex
-  useEffect(() => {
-    if (!fromMe && myUsername && props.msg.text) {
-      const mentionRegex = new RegExp(`@${myUsername}\\b`, 'i');
-      if (mentionRegex.test(props.msg.text)) {
-        // Add message to mentions
-        addMention(props.msg.id);
-      }
-    }
-  }, [props.msg, myUsername, fromMe, addMention]);
+  const messageRef = useRef<HTMLDivElement>(null);
+  const hasMention = !fromMe && myUsername && props.msg.text ? new RegExp(`@${myUsername}\\b`, 'i').test(props.msg.text) : false;
 
   if (!sender) {
     return <UnreadableMessage />;
@@ -61,23 +47,17 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
 
   const { name: senderName, picture: senderPicture } = sender;
   const { text: messageText, image: messageImage } = props.msg;
+  const senderAvatar = resolveImageUrl(senderPicture);
+  console.log(senderAvatar);
 
   return (
     <div
+      ref={messageRef}
       className={`${fromMe ? "items-end" : "items-start"} flex flex-col m-3`}
       role="row"
-      onClick={() => {
-        // Mark mention as seen when clicked
-        if (!fromMe && myUsername && messageText) {
-          const mentionRegex = new RegExp(`@${myUsername}\\b`, 'i');
-          if (mentionRegex.test(messageText)) {
-            markMentionAsSeen(props.msg.id);
-          }
-        }
-      }}
     >
       <div className={`flex gap-2 w-full flex-row ${fromMe ? "flex-row-reverse items-end" : "flex-row items-start"} `}>
-        <SenderAvatar picture={senderPicture} name={senderName} fromMe={fromMe} />
+        <SenderAvatar picture={senderAvatar} name={senderName} fromMe={fromMe} />
 
         <div
           className={clsx(
@@ -98,7 +78,7 @@ export function ChatMessage(props: { me: Account; msg: Message }) {
               )}
             </ProgressiveImg>
           )}
-          <div className={`px-2 leading-relaxed prose-sm max-w-none ${fromMe ? "prose-invert dark:prose" : "prose  dark:prose-invert"} 
+          <div className={`px-2 leading-relaxed prose-sm max-w-none ${fromMe ? "prose-invert dark:prose" : "prose dark:prose-invert"} 
             prose-blockquote:my-1 prose-blockquote:h-fit prose-blockquote:border-l-2 
             `}>
             <ReactMarkdown

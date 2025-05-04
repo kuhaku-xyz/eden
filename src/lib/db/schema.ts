@@ -1,5 +1,5 @@
 import { CoMap, co, CoFeed, Account, CoList, ImageDefinition, Profile, Group } from "jazz-tools";
-import { getLensClient } from "../lens/client";
+import { getLensClient } from "../lens/lens-client";
 import { fetchAccount } from "@lens-protocol/client/actions";
 
 export class BoxProfile extends Profile {
@@ -23,6 +23,7 @@ export class BoxAccount extends Account {
   async migrate() {
     const username = this.profile?.name;
     if (!username) {
+      console.error("No username found for account", this.id);
       return;
     }
 
@@ -34,13 +35,12 @@ export class BoxAccount extends Account {
     }).unwrapOr(null);
 
     if (!account?.username?.localName) {
+      console.error("No account found for username", username);
       return;
     }
 
     const group = Group.create();
-
-    // The profile is visible to everyone
-    group.addMember("everyone", "reader"); 
+    group.addMember("everyone", "reader");
 
     const profile = BoxProfile.create({
       name: username,
@@ -59,9 +59,8 @@ export class Message extends CoMap {
 
 export class Chat extends CoList.Of(co.ref(Message)) { }
 
-// Register the Account schema so `useAccount` returns our custom `MyAppAccount` 
 declare module "jazz-react" {
-    interface Register {
-        Account: BoxAccount;
-    }
+  interface Register {
+    Account: BoxAccount;
+  }
 }

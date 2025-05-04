@@ -1,6 +1,6 @@
 "use client";
 
-import { getPublicClient } from "@/lib/lens/client";
+import { getPublicClient } from "@/lib/lens/lens-client";
 import { chains } from "@lens-chain/sdk/viem";
 import { LensProvider } from "@lens-protocol/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -10,7 +10,6 @@ import { JSX } from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { ThemeProvider } from "next-themes";
 import { JazzProvider } from "./jazz-provider";
-import { NotificationProvider } from "@/context/notification-context";
 
 const wagmiConfig = createConfig(
   getDefaultConfig({
@@ -38,9 +37,7 @@ export const Providers = ({ children }: { children: JSX.Element }) => {
           <ConnectKitProvider>
             <LensProvider client={publicClient}>
               <JazzProvider>
-                <NotificationProvider>
-                  {children}
-                </NotificationProvider>
+                {children}
               </JazzProvider>
             </LensProvider>
           </ConnectKitProvider>
